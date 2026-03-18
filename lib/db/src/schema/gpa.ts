@@ -16,6 +16,7 @@ export const coursesTable = pgTable("courses", {
   name: text("name").notNull().default(""),
   credits: real("credits").notNull().default(3),
   marks: real("marks"),
+  gradeLetter: text("grade_letter"),
   position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

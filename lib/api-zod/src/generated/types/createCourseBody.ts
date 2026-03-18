@@ -10,4 +10,5 @@ export interface CreateCourseBody {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }

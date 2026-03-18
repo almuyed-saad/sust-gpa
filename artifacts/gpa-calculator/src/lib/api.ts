@@ -16,6 +16,7 @@ export interface ApiCourse {
   name: string;
   credits: number;
   marks: number | null;
+  gradeLetter: string | null;
 }
 
 export interface ApiSemester {
@@ -38,12 +39,12 @@ export const api = {
     }),
   deleteSemester: (id: string) =>
     apiFetch<{ success: boolean }>(`/semesters/${id}`, { method: "DELETE" }),
-  createCourse: (semesterId: string, data: { name: string; credits: number; marks?: number | null }) =>
+  createCourse: (semesterId: string, data: { name: string; credits: number; marks?: number | null; gradeLetter?: string | null }) =>
     apiFetch<{ course: ApiCourse }>(`/semesters/${semesterId}/courses`, {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  updateCourse: (semesterId: string, courseId: string, data: { name: string; credits: number; marks?: number | null }) =>
+  updateCourse: (semesterId: string, courseId: string, data: { name: string; credits: number; marks?: number | null; gradeLetter?: string | null }) =>
     apiFetch<{ course: ApiCourse }>(`/semesters/${semesterId}/courses/${courseId}`, {
       method: "PUT",
       body: JSON.stringify(data),

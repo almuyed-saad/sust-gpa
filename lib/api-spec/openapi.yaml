@@ -381,6 +381,9 @@ components:
         marks:
           type: number
           nullable: true
+        gradeLetter:
+          type: string
+          nullable: true
       required:
         - id
         - semesterId
@@ -455,6 +458,9 @@ components:
         marks:
           type: number
           nullable: true
+        gradeLetter:
+          type: string
+          nullable: true
       required:
         - name
         - credits
@@ -468,6 +474,9 @@ components:
           type: number
         marks:
           type: number
+          nullable: true
+        gradeLetter:
+          type: string
           nullable: true
       required:
         - name

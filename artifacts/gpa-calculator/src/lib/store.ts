@@ -7,6 +7,7 @@ export interface Course {
   name: string;
   credits: number | '';
   marks: number | '';
+  gradeLetter: string;
 }
 
 export interface Semester {
@@ -27,14 +28,18 @@ interface GpaState {
   loadFromApi: (semesters: Semester[]) => void;
 }
 
+const newCourse = (): Course => ({
+  id: uuidv4(),
+  name: '',
+  credits: 3,
+  marks: '',
+  gradeLetter: '',
+});
+
 const createInitialSemester = (): Semester => ({
   id: uuidv4(),
   name: 'Year 1, Semester 1',
-  courses: [
-    { id: uuidv4(), name: '', credits: 3, marks: '' },
-    { id: uuidv4(), name: '', credits: 3, marks: '' },
-    { id: uuidv4(), name: '', credits: 3, marks: '' },
-  ],
+  courses: [newCourse(), newCourse(), newCourse()],
 });
 
 export const useGpaStore = create<GpaState>()(
@@ -50,7 +55,7 @@ export const useGpaStore = create<GpaState>()(
           {
             id: uuidv4(),
             name: `Semester ${state.semesters.length + 1}`,
-            courses: [{ id: uuidv4(), name: '', credits: 3, marks: '' }],
+            courses: [newCourse()],
           }
         ]
       })),
@@ -66,7 +71,7 @@ export const useGpaStore = create<GpaState>()(
       addCourse: (semesterId) => set((state) => ({
         semesters: state.semesters.map(s => s.id === semesterId ? {
           ...s,
-          courses: [...s.courses, { id: uuidv4(), name: '', credits: 3, marks: '' }]
+          courses: [...s.courses, newCourse()]
         } : s)
       })),
 
@@ -89,7 +94,7 @@ export const useGpaStore = create<GpaState>()(
       })
     }),
     {
-      name: 'sust-gpa-calculator-v1',
+      name: 'sust-gpa-calculator-v2',
     }
   )
 );

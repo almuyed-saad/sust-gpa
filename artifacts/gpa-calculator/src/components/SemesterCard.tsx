@@ -88,11 +88,12 @@ export function SemesterCard({ semester }: SemesterCardProps) {
       </div>
 
       <div className="p-6">
-        <div className="hidden md:grid grid-cols-12 gap-3 mb-2 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <div className="col-span-5">Course</div>
+        <div className="hidden md:grid grid-cols-12 gap-2 mb-2 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="col-span-4">Course</div>
           <div className="col-span-2 text-center">Credits</div>
-          <div className="col-span-2 text-center">Marks</div>
-          <div className="col-span-2 text-center">Grade</div>
+          <div className="col-span-1 text-center">Mode</div>
+          <div className="col-span-3 text-center">Marks / Grade</div>
+          <div className="col-span-1 text-center">GP</div>
           <div className="col-span-1"></div>
         </div>
 

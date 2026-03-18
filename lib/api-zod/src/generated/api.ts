@@ -90,6 +90,7 @@ export const GetSemestersResponse = zod.object({
           name: zod.string(),
           credits: zod.number(),
           marks: zod.number().nullish(),
+          gradeLetter: zod.string().nullish(),
         }),
       ),
     }),
@@ -125,6 +126,7 @@ export const UpdateSemesterResponse = zod.object({
         name: zod.string(),
         credits: zod.number(),
         marks: zod.number().nullish(),
+        gradeLetter: zod.string().nullish(),
       }),
     ),
   }),
@@ -152,6 +154,7 @@ export const CreateCourseBody = zod.object({
   name: zod.string(),
   credits: zod.number(),
   marks: zod.number().nullish(),
+  gradeLetter: zod.string().nullish(),
 });
 
 /**
@@ -166,6 +169,7 @@ export const UpdateCourseBody = zod.object({
   name: zod.string(),
   credits: zod.number(),
   marks: zod.number().nullish(),
+  gradeLetter: zod.string().nullish(),
 });
 
 export const UpdateCourseResponse = zod.object({
@@ -175,6 +179,7 @@ export const UpdateCourseResponse = zod.object({
     name: zod.string(),
     credits: zod.number(),
     marks: zod.number().nullish(),
+    gradeLetter: zod.string().nullish(),
   }),
 });
 

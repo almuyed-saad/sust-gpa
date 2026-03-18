@@ -1,8 +1,17 @@
 import { useCallback, useRef } from "react";
 import { useAuth } from "@workspace/replit-auth-web";
-import { v4 as uuidv4 } from "uuid";
 import { api } from "@/lib/api";
 import { useGpaStore, type Course } from "@/lib/store";
+
+function mapApiCourse(c: { id: string; name: string; credits: number; marks: number | null; gradeLetter?: string | null }): Course {
+  return {
+    id: c.id,
+    name: c.name,
+    credits: c.credits,
+    marks: c.marks ?? '',
+    gradeLetter: c.gradeLetter ?? '',
+  };
+}
 
 export function useGpaActions() {
   const { isAuthenticated } = useAuth();
@@ -20,9 +29,7 @@ export function useGpaActions() {
       store.loadFromApi([...store.semesters, {
         id: semester.id,
         name: semester.name,
-        courses: semester.courses.map(c => ({
-          id: c.id, name: c.name, credits: c.credits, marks: c.marks ?? ''
-        }))
+        courses: semester.courses.map(mapApiCourse),
       }]);
     } catch {
       store.addSemester();
@@ -49,10 +56,10 @@ export function useGpaActions() {
       return;
     }
     try {
-      const { course } = await api.createCourse(semesterId, { name: "", credits: 3, marks: null });
+      const { course } = await api.createCourse(semesterId, { name: "", credits: 3, marks: null, gradeLetter: null });
       store.loadFromApi(store.semesters.map(s =>
         s.id === semesterId
-          ? { ...s, courses: [...s.courses, { id: course.id, name: course.name, credits: course.credits, marks: course.marks ?? '' }] }
+          ? { ...s, courses: [...s.courses, mapApiCourse(course)] }
           : s
       ));
     } catch {
@@ -84,6 +91,7 @@ export function useGpaActions() {
         name: updated.name,
         credits: typeof updated.credits === 'number' ? updated.credits : 3,
         marks: typeof updated.marks === 'number' ? updated.marks : null,
+        gradeLetter: updated.gradeLetter || null,
       }).catch(() => {});
     }, 600);
   }, [isAuthenticated, store]);

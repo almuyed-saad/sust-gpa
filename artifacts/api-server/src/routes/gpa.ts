@@ -168,6 +168,7 @@ router.post("/semesters/:semesterId/courses", async (req: Request, res: Response
       name: parsed.data.name,
       credits: parsed.data.credits,
       marks: parsed.data.marks ?? null,
+      gradeLetter: parsed.data.gradeLetter ?? null,
       position: existing.length,
     })
     .returning();
@@ -203,6 +204,7 @@ router.put("/semesters/:semesterId/courses/:courseId", async (req: Request, res:
       name: parsed.data.name,
       credits: parsed.data.credits,
       marks: parsed.data.marks ?? null,
+      gradeLetter: parsed.data.gradeLetter ?? null,
       updatedAt: new Date(),
     })
     .where(and(eq(coursesTable.id, courseId), eq(coursesTable.semesterId, semesterId)))

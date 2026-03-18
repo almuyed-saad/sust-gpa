@@ -10,4 +10,5 @@ export interface UpdateCourseBody {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }

@@ -43,6 +43,7 @@ export interface Course {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }
 
 export interface Semester {
@@ -75,12 +76,14 @@ export interface CreateCourseBody {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }
 
 export interface UpdateCourseBody {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }
 
 export interface DeleteResponse {

@@ -12,4 +12,5 @@ export interface Course {
   name: string;
   credits: number;
   marks?: number | null;
+  gradeLetter?: string | null;
 }
