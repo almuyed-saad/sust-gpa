@@ -2,8 +2,9 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Course, useGpaStore } from "@/lib/store";
+import { Course } from "@/lib/store";
 import { GradeBadge } from "./GradeBadge";
+import { useGpaActions } from "@/hooks/useGpaActions";
 
 interface CourseRowProps {
   semesterId: string;
@@ -11,8 +12,7 @@ interface CourseRowProps {
 }
 
 export function CourseRow({ semesterId, course }: CourseRowProps) {
-  const updateCourse = useGpaStore((state) => state.updateCourse);
-  const removeCourse = useGpaStore((state) => state.removeCourse);
+  const { updateCourse, removeCourse } = useGpaActions();
 
   const handleMarksChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -61,7 +61,7 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
       <div className="md:col-span-2 relative">
         <Input
           type="number"
-          placeholder="Marks (0-100)"
+          placeholder="Marks"
           value={course.marks}
           onChange={handleMarksChange}
           className="bg-transparent border-transparent hover:border-slate-200 focus:bg-white focus:border-primary shadow-none h-9 text-center font-medium"

@@ -8,3 +8,91 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AuthUser {
+  id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  profileImageUrl?: string | null;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  code: string;
+  code_verifier: string;
+  redirect_uri: string;
+  state: string;
+  nonce?: string | null;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export interface LogoutMobileSessionSuccess {
+  success: boolean;
+}
+
+export interface Course {
+  id: string;
+  semesterId: string;
+  name: string;
+  credits: number;
+  marks?: number | null;
+}
+
+export interface Semester {
+  id: string;
+  name: string;
+  courses: Course[];
+}
+
+export interface SemesterListResponse {
+  semesters: Semester[];
+}
+
+export interface SemesterResponse {
+  semester: Semester;
+}
+
+export interface CourseResponse {
+  course: Course;
+}
+
+export interface CreateSemesterBody {
+  name: string;
+}
+
+export interface UpdateSemesterBody {
+  name: string;
+}
+
+export interface CreateCourseBody {
+  name: string;
+  credits: number;
+  marks?: number | null;
+}
+
+export interface UpdateCourseBody {
+  name: string;
+  credits: number;
+  marks?: number | null;
+}
+
+export interface DeleteResponse {
+  success: boolean;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export type AuthorizationSessionHeaderParameter = string;
+
+export type BeginBrowserLoginParams = {
+  returnTo?: string;
+};

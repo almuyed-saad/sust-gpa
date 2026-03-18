@@ -14,3 +14,178 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary Get the currently authenticated user
+ */
+export const GetCurrentAuthUserHeader = zod.object({
+  Authorization: zod.string().optional(),
+});
+
+export const GetCurrentAuthUserResponse = zod.object({
+  user: zod.union([
+    zod.object({
+      id: zod.string(),
+      email: zod.string().nullish(),
+      firstName: zod.string().nullish(),
+      lastName: zod.string().nullish(),
+      profileImageUrl: zod.string().nullish(),
+    }),
+    zod.null(),
+  ]),
+});
+
+/**
+ * @summary Start the browser OIDC login flow
+ */
+export const BeginBrowserLoginQueryParams = zod.object({
+  returnTo: zod.coerce.string().optional(),
+});
+
+/**
+ * @summary Clear the session and begin OIDC logout
+ */
+export const LogoutBrowserSessionHeader = zod.object({
+  Authorization: zod.string().optional(),
+});
+
+/**
+ * @summary Exchange a mobile OIDC code for a session token
+ */
+export const ExchangeMobileAuthorizationCodeBody = zod.object({
+  code: zod.string(),
+  code_verifier: zod.string(),
+  redirect_uri: zod.string(),
+  state: zod.string(),
+  nonce: zod.string().nullish(),
+});
+
+export const ExchangeMobileAuthorizationCodeResponse = zod.object({
+  token: zod.string(),
+});
+
+/**
+ * @summary Log out a mobile session
+ */
+export const LogoutMobileSessionHeader = zod.object({
+  Authorization: zod.string().optional(),
+});
+
+export const LogoutMobileSessionResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Get all semesters for the authenticated user
+ */
+export const GetSemestersResponse = zod.object({
+  semesters: zod.array(
+    zod.object({
+      id: zod.string(),
+      name: zod.string(),
+      courses: zod.array(
+        zod.object({
+          id: zod.string(),
+          semesterId: zod.string(),
+          name: zod.string(),
+          credits: zod.number(),
+          marks: zod.number().nullish(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * @summary Create a new semester
+ */
+export const CreateSemesterBody = zod.object({
+  name: zod.string(),
+});
+
+/**
+ * @summary Update a semester name
+ */
+export const UpdateSemesterParams = zod.object({
+  semesterId: zod.coerce.string(),
+});
+
+export const UpdateSemesterBody = zod.object({
+  name: zod.string(),
+});
+
+export const UpdateSemesterResponse = zod.object({
+  semester: zod.object({
+    id: zod.string(),
+    name: zod.string(),
+    courses: zod.array(
+      zod.object({
+        id: zod.string(),
+        semesterId: zod.string(),
+        name: zod.string(),
+        credits: zod.number(),
+        marks: zod.number().nullish(),
+      }),
+    ),
+  }),
+});
+
+/**
+ * @summary Delete a semester and all its courses
+ */
+export const DeleteSemesterParams = zod.object({
+  semesterId: zod.coerce.string(),
+});
+
+export const DeleteSemesterResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Add a course to a semester
+ */
+export const CreateCourseParams = zod.object({
+  semesterId: zod.coerce.string(),
+});
+
+export const CreateCourseBody = zod.object({
+  name: zod.string(),
+  credits: zod.number(),
+  marks: zod.number().nullish(),
+});
+
+/**
+ * @summary Update a course
+ */
+export const UpdateCourseParams = zod.object({
+  semesterId: zod.coerce.string(),
+  courseId: zod.coerce.string(),
+});
+
+export const UpdateCourseBody = zod.object({
+  name: zod.string(),
+  credits: zod.number(),
+  marks: zod.number().nullish(),
+});
+
+export const UpdateCourseResponse = zod.object({
+  course: zod.object({
+    id: zod.string(),
+    semesterId: zod.string(),
+    name: zod.string(),
+    credits: zod.number(),
+    marks: zod.number().nullish(),
+  }),
+});
+
+/**
+ * @summary Delete a course
+ */
+export const DeleteCourseParams = zod.object({
+  semesterId: zod.coerce.string(),
+  courseId: zod.coerce.string(),
+});
+
+export const DeleteCourseResponse = zod.object({
+  success: zod.boolean(),
+});

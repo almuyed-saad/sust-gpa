@@ -4,12 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useGpaStore } from "@/lib/store";
 import { calculateOverallStats } from "@/lib/gpa-utils";
+import { useGpaActions } from "@/hooks/useGpaActions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export function DashboardStats() {
   const semesters = useGpaStore((state) => state.semesters);
-  const clearAll = useGpaStore((state) => state.clearAll);
-  
+  const { clearAll } = useGpaActions();
   const stats = calculateOverallStats(semesters);
 
   return (
@@ -50,7 +50,7 @@ export function DashboardStats() {
               <h2 className="text-3xl font-display font-bold text-slate-800">{stats.totalCourses}</h2>
             </div>
           </div>
-          
+
           <div className="ml-auto">
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -60,7 +60,7 @@ export function DashboardStats() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Reset all data?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This will permanently delete all your semesters, courses, and marks. This action cannot be undone.
                   </AlertDialogDescription>

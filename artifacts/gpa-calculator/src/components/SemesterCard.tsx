@@ -4,19 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Semester, useGpaStore } from "@/lib/store";
+import { Semester } from "@/lib/store";
 import { CourseRow } from "./CourseRow";
 import { calculateSemesterStats } from "@/lib/gpa-utils";
+import { useGpaActions } from "@/hooks/useGpaActions";
 
 interface SemesterCardProps {
   semester: Semester;
 }
 
 export function SemesterCard({ semester }: SemesterCardProps) {
-  const addCourse = useGpaStore((state) => state.addCourse);
-  const removeSemester = useGpaStore((state) => state.removeSemester);
-  const updateSemesterName = useGpaStore((state) => state.updateSemesterName);
-  
+  const { addCourse, removeSemester, updateSemesterName } = useGpaActions();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(semester.name);
 
@@ -66,7 +64,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-md border shadow-sm">
             <div className="text-xs text-slate-500 font-medium">
@@ -77,9 +75,9 @@ export function SemesterCard({ semester }: SemesterCardProps) {
               GPA: <span className="text-primary font-bold">{stats.gpa.toFixed(2)}</span>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => removeSemester(semester.id)}
             className="text-slate-400 hover:text-red-600 hover:bg-red-50"
             title="Delete Semester"
@@ -114,8 +112,8 @@ export function SemesterCard({ semester }: SemesterCardProps) {
           </AnimatePresence>
         </div>
 
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => addCourse(semester.id)}
           className="mt-4 w-full border-dashed border-slate-300 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all"
         >

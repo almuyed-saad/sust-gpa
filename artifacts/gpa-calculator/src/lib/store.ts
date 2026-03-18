@@ -24,6 +24,7 @@ interface GpaState {
   removeCourse: (semesterId: string, courseId: string) => void;
   updateCourse: (semesterId: string, courseId: string, field: keyof Course, value: string | number | '') => void;
   clearAll: () => void;
+  loadFromApi: (semesters: Semester[]) => void;
 }
 
 const createInitialSemester = (): Semester => ({
@@ -40,6 +41,8 @@ export const useGpaStore = create<GpaState>()(
   persist(
     (set) => ({
       semesters: [createInitialSemester()],
+
+      loadFromApi: (semesters) => set({ semesters }),
 
       addSemester: () => set((state) => ({
         semesters: [
