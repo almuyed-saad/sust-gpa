@@ -8,7 +8,7 @@ import { DashboardStats } from "@/components/DashboardStats";
 import { GradingScale } from "@/components/GradingScale";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { calculateSemesterStats } from "@/lib/gpa-utils";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth, login, logout } from "@/hooks/useAuth";
 import { useGpaActions } from "@/hooks/useGpaActions";
 import { api } from "@/lib/api";
 
@@ -54,7 +54,7 @@ export default function Dashboard() {
   const semesters = useGpaStore((state) => state.semesters);
   const loadFromApi = useGpaStore((state) => state.loadFromApi);
   const { addSemester } = useGpaActions();
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export default function Dashboard() {
             name: c.name,
             credits: c.credits,
             marks: c.marks ?? '',
+            gradeLetter: c.gradeLetter ?? '',
           }))
         })));
       }).catch(console.error);

@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { useGpaStore, type Course } from "@/lib/store";
 
