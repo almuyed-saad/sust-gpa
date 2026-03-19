@@ -214,38 +214,24 @@ export default function Dashboard() {
       </main>
 
       <footer className="mt-16 border-t border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-white">
-                <Calculator className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold text-slate-800">SUST GPA Calculator</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center space-y-1">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-white">
+              <Calculator className="w-3.5 h-3.5" />
             </div>
-            <div className="text-center text-sm text-slate-500">
-              <p>Built for SUST Mathematics students · Bangladesh University Grading Scale</p>
-              <p className="mt-1 text-xs text-slate-400">
-                Grades calculated per standard Bangladesh public university scale (A+ = 4.00, F = 0.00)
-              </p>
-            </div>
-            <div className="text-xs text-slate-400">
-              Data is{' '}
-              {isAuthenticated ? (
-                <span className="text-emerald-600 font-medium">cloud-synced ✓</span>
-              ) : (
-                <span className="text-amber-600 font-medium">browser-only</span>
-              )}
-            </div>
+            <span className="font-semibold text-slate-800">SUST GPA Calculator</span>
           </div>
-
-          <div className="border-t border-slate-100 pt-5 text-center">
-            <p className="text-sm text-slate-500">
-              Made with care by <span className="font-semibold text-slate-700">Saad</span> — Mathematics student at Shahjalal University of Science and Technology (SUST), Bangladesh.
-            </p>
-            <p className="mt-1 text-xs text-slate-400">
-              Built to make academic tracking easier for fellow SUST Math students.
-            </p>
-          </div>
+          <p className="text-sm text-slate-500">
+            Made by <span className="font-semibold text-slate-700">Saad</span> — Mathematics student at SUST, Bangladesh.
+          </p>
+          <p className="text-xs text-slate-400">
+            Bangladesh university grading scale · A+ = 4.00, F = 0.00 · Data is{' '}
+            {isAuthenticated ? (
+              <span className="text-emerald-600 font-medium">cloud-synced ✓</span>
+            ) : (
+              <span className="text-amber-600 font-medium">browser-only</span>
+            )}
+          </p>
         </div>
       </footer>
     </div>
