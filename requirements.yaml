@@ -1,0 +1,13 @@
+packages:
+  "zustand": "For elegant local storage state management without backend"
+  "uuid": "For generating unique IDs for semesters and courses"
+  "@types/uuid": "Types for uuid"
+  "recharts": "For visualizing GPA progression"
+  "framer-motion": "For smooth layout animations when adding/removing courses"
+  "lucide-react": "Icons for the UI"
+
+images: []
+
+notes:
+  - "The app is purely frontend-driven, using Zustand with persist middleware for localStorage."
+  - "All standard shadcn UI components are assumed to be available in @/components/ui/."
