@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, withRetry } from "@workspace/db";
 import {
   clearSession,
   getSessionId,
@@ -151,13 +151,13 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
       return;
     }
 
-    const dbUser = await upsertUser({
+    const dbUser = await withRetry(() => upsertUser({
       id: profile.sub,
       email: profile.email,
       firstName: profile.given_name || null,
       lastName: profile.family_name || null,
       picture: profile.picture || null,
-    });
+    }));
 
     const sessionData: SessionData = {
       user: {
@@ -169,7 +169,7 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
       },
     };
 
-    const sid = await createSession(sessionData);
+    const sid = await withRetry(() => createSession(sessionData));
     setSessionCookie(res, sid);
     res.redirect(returnTo);
   } catch (err) {
