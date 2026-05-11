@@ -12,38 +12,58 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
   max: 5,
 });
 
 export const db = drizzle(pool, { schema });
 
+function isRetryableError(err: unknown): boolean {
+  const message = [
+    err instanceof Error ? err.message : "",
+    err instanceof Error && err.cause instanceof Error ? err.cause.message : "",
+    err instanceof Error && typeof (err as { cause?: unknown }).cause === "string"
+      ? String((err as { cause?: unknown }).cause)
+      : "",
+    String(err),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    message.includes("endpoint has been disabled") ||
+    message.includes("control plane request failed") ||
+    message.includes("connection terminated") ||
+    message.includes("connection refused") ||
+    message.includes("econnreset") ||
+    message.includes("etimedout") ||
+    message.includes("failed to fetch") ||
+    message.includes("starting") ||
+    message.includes("waking")
+  );
+}
+
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  retries = 4,
-  delayMs = 1500,
+  retries = 5,
+  baseDelayMs = 2000,
 ): Promise<T> {
+  let lastErr: unknown;
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       return await fn();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? (err.message + (err.cause instanceof Error ? err.cause.message : "")) : String(err);
-      const isNeonSleep =
-        msg.includes("endpoint has been disabled") ||
-        msg.includes("Control plane request failed") ||
-        msg.includes("connection terminated") ||
-        msg.includes("ECONNRESET") ||
-        msg.includes("ETIMEDOUT");
-
-      if (isNeonSleep && attempt < retries) {
-        await new Promise((r) => setTimeout(r, delayMs * attempt));
+      lastErr = err;
+      if (attempt < retries && isRetryableError(err)) {
+        const delay = baseDelayMs * attempt;
+        await new Promise((r) => setTimeout(r, delay));
         continue;
       }
       throw err;
     }
   }
-  throw new Error("withRetry: exhausted retries");
+  throw lastErr;
 }
 
 export * from "./schema";
