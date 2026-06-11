@@ -2,7 +2,7 @@
 
 A GPA and grade tracker built for Mathematics students at Shahjalal University of Science and Technology (SUST), Bangladesh.
 
-Live app: [https://about-myself--iamsaad236.replit.app](https://about-myself--iamsaad236.replit.app)
+Live app: https://sust-gpa--iamsaad236.replit.app
 
 Built by **Saad** — Mathematics student at SUST.
 
