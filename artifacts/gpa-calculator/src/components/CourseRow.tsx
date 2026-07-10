@@ -52,13 +52,13 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
   const gradeInfo = getGradeInfo(course.marks, course.gradeLetter || undefined);
 
   return (
-    <div className="group grid grid-cols-12 gap-2 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors px-2 -mx-2 rounded-lg">
+    <div className="group grid grid-cols-12 gap-2 items-center py-3 border-b border-border/60 last:border-0 hover:bg-muted/30 transition-colors px-2 -mx-2 rounded-lg">
       <div className="col-span-4">
         <Input
           placeholder="Course name…"
           value={course.name}
           onChange={(e) => updateCourse(semesterId, course.id, 'name', e.target.value)}
-          className="bg-transparent border-transparent hover:border-slate-200 focus:bg-white focus:border-primary shadow-none h-9"
+          className="bg-transparent border-transparent hover:border-border focus:bg-card focus:border-primary shadow-none h-9 text-foreground placeholder:text-muted-foreground/50"
         />
       </div>
 
@@ -69,7 +69,7 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           placeholder="3"
           value={course.credits}
           onChange={handleCreditsChange}
-          className="bg-transparent border-transparent hover:border-slate-200 focus:bg-white focus:border-primary shadow-none h-9 text-center"
+          className="bg-transparent border-transparent hover:border-border focus:bg-card focus:border-primary shadow-none h-9 text-center text-foreground"
         />
       </div>
 
@@ -82,8 +82,8 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           disabled={!!course.gradeLetter}
           className={`h-9 text-center shadow-none transition-colors ${
             course.gradeLetter
-              ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed'
-              : 'bg-transparent border-transparent hover:border-slate-200 focus:bg-white focus:border-primary'
+              ? 'bg-muted/60 border-border/40 text-muted-foreground/40 cursor-not-allowed'
+              : 'bg-transparent border-transparent hover:border-border focus:bg-card focus:border-primary text-foreground'
           }`}
         />
       </div>
@@ -97,7 +97,7 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
             className={`px-1.5 py-0.5 rounded text-xs font-bold border transition-all ${
               course.gradeLetter === g
                 ? getGradeButtonActiveClass(g)
-                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-800'
+                : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground'
             }`}
           >
             {g}
@@ -107,11 +107,11 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
 
       <div className="col-span-1 flex items-center justify-center">
         {gradeInfo.points !== null ? (
-          <div className={`px-2 py-1 rounded-md border text-xs font-bold ${gradeInfo.colorClass}`}>
+          <div className={`px-2 py-1 rounded-md border text-xs font-bold ${getGradePointClass(gradeInfo.points)}`}>
             {gradeInfo.points.toFixed(2)}
           </div>
         ) : (
-          <div className="px-2 py-1 rounded-md border text-xs font-semibold bg-slate-50 text-slate-300 border-slate-200">
+          <div className="px-2 py-1 rounded-md border text-xs font-semibold bg-muted/60 text-muted-foreground/40 border-border/40">
             —
           </div>
         )}
@@ -122,7 +122,7 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           variant="ghost"
           size="icon"
           onClick={() => removeCourse(semesterId, course.id)}
-          className="text-slate-400 hover:text-red-500 hover:bg-red-50 h-8 w-8"
+          className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-8 w-8"
           title="Remove Course"
         >
           <Trash2 className="w-4 h-4" />
@@ -133,10 +133,19 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
 }
 
 function getGradeButtonActiveClass(g: string): string {
-  if (g === 'A+') return 'bg-emerald-100 text-emerald-800 border-emerald-400 ring-1 ring-emerald-300';
-  if (g === 'A' || g === 'A-') return 'bg-blue-100 text-blue-800 border-blue-400 ring-1 ring-blue-300';
-  if (g === 'B+' || g === 'B' || g === 'B-') return 'bg-indigo-100 text-indigo-800 border-indigo-400 ring-1 ring-indigo-300';
-  if (g === 'C+' || g === 'C') return 'bg-amber-100 text-amber-800 border-amber-400 ring-1 ring-amber-300';
-  if (g === 'D') return 'bg-orange-100 text-orange-800 border-orange-400 ring-1 ring-orange-300';
-  return 'bg-red-100 text-red-800 border-red-400 ring-1 ring-red-300';
+  if (g === 'A+') return 'bg-emerald-500/20 text-emerald-500 border-emerald-500/50 ring-1 ring-emerald-500/30';
+  if (g === 'A' || g === 'A-') return 'bg-blue-500/20 text-blue-500 border-blue-500/50 ring-1 ring-blue-500/30';
+  if (g === 'B+' || g === 'B' || g === 'B-') return 'bg-indigo-500/20 text-indigo-500 border-indigo-500/50 ring-1 ring-indigo-500/30';
+  if (g === 'C+' || g === 'C') return 'bg-amber-500/20 text-amber-500 border-amber-500/50 ring-1 ring-amber-500/30';
+  if (g === 'D') return 'bg-orange-500/20 text-orange-500 border-orange-500/50 ring-1 ring-orange-500/30';
+  return 'bg-red-500/20 text-red-500 border-red-500/50 ring-1 ring-red-500/30';
+}
+
+function getGradePointClass(points: number): string {
+  if (points >= 3.75) return 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30';
+  if (points >= 3.25) return 'bg-blue-500/15 text-blue-500 border-blue-500/30';
+  if (points >= 2.75) return 'bg-indigo-500/15 text-indigo-500 border-indigo-500/30';
+  if (points >= 2.50) return 'bg-amber-500/15 text-amber-500 border-amber-500/30';
+  if (points >= 2.00) return 'bg-orange-500/15 text-orange-500 border-orange-500/30';
+  return 'bg-red-500/15 text-red-500 border-red-500/30';
 }
