@@ -14,7 +14,8 @@ export function DashboardStats() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <Card className="relative overflow-hidden border-none shadow-md bg-gradient-to-br from-primary to-indigo-800 text-white">
+      {/* CGPA card — gradient stays vivid, uses primary-foreground text */}
+      <Card className="relative overflow-hidden border-none shadow-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
         <div className="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
           <GraduationCap className="w-32 h-32" />
         </div>
@@ -27,47 +28,49 @@ export function DashboardStats() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-slate-200">
+      {/* Total Credits */}
+      <Card className="shadow-sm border-border bg-card">
         <CardContent className="p-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+          <div className="w-12 h-12 rounded-full bg-blue-500/15 flex items-center justify-center text-blue-500">
             <BookMarked className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-slate-500 text-sm font-medium mb-1">Total Credits</p>
-            <h2 className="text-3xl font-display font-bold text-slate-800">{stats.totalCredits}</h2>
+            <p className="text-muted-foreground text-sm font-medium mb-1">Total Credits</p>
+            <h2 className="text-3xl font-display font-bold text-foreground">{stats.totalCredits}</h2>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-slate-200">
+      {/* Total Courses */}
+      <Card className="shadow-sm border-border bg-card">
         <CardContent className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-500">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-slate-500 text-sm font-medium mb-1">Total Courses</p>
-              <h2 className="text-3xl font-display font-bold text-slate-800">{stats.totalCourses}</h2>
+              <p className="text-muted-foreground text-sm font-medium mb-1">Total Courses</p>
+              <h2 className="text-3xl font-display font-bold text-foreground">{stats.totalCourses}</h2>
             </div>
           </div>
 
           <div className="ml-auto">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600 hover:bg-red-50" title="Reset All Data">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10" title="Reset All Data">
                   <Trash2 className="w-5 h-5" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="bg-card border-border text-foreground">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Reset all data?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-foreground">Reset all data?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground">
                     This will permanently delete all your semesters, courses, and marks. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={clearAll} className="bg-red-600 hover:bg-red-700 focus:ring-red-600">
+                  <AlertDialogCancel className="border-border text-foreground hover:bg-muted">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearAll} className="bg-red-600 hover:bg-red-700 text-white">
                     Yes, reset all data
                   </AlertDialogAction>
                 </AlertDialogFooter>
