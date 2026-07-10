@@ -38,8 +38,8 @@ export function SemesterCard({ semester }: SemesterCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden bg-white shadow-sm border-slate-200/60 mb-6">
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <Card className="overflow-hidden bg-card shadow-sm border-border mb-6">
+      <div className="px-6 py-4 border-b border-border bg-muted/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-1">
           {isEditingName ? (
             <div className="flex items-center gap-2 w-full max-w-sm">
@@ -51,27 +51,27 @@ export function SemesterCard({ semester }: SemesterCardProps) {
                 onBlur={saveName}
                 className="h-8 text-base font-display font-semibold"
               />
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={saveName}>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-500" onClick={saveName}>
                 <Check className="w-4 h-4" />
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingName(true)}>
-              <h3 className="text-lg font-display font-semibold text-slate-900 group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-display font-semibold text-foreground group-hover:text-primary transition-colors">
                 {semester.name}
               </h3>
-              <Edit2 className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit2 className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           )}
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-md border shadow-sm">
-            <div className="text-xs text-slate-500 font-medium">
-              Credits: <span className="text-slate-900">{stats.totalCredits}</span>
+          <div className="flex items-center gap-3 bg-card px-3 py-1.5 rounded-md border border-border shadow-xs">
+            <div className="text-xs text-muted-foreground font-medium">
+              Credits: <span className="text-foreground font-semibold">{stats.totalCredits}</span>
             </div>
-            <div className="w-px h-4 bg-slate-200"></div>
-            <div className="text-xs text-slate-500 font-medium">
+            <div className="w-px h-4 bg-border"></div>
+            <div className="text-xs text-muted-foreground font-medium">
               GPA: <span className="text-primary font-bold">{stats.gpa.toFixed(2)}</span>
             </div>
           </div>
@@ -79,7 +79,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
             variant="ghost"
             size="icon"
             onClick={() => removeSemester(semester.id)}
-            className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+            className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
             title="Delete Semester"
           >
             <Trash2 className="w-4 h-4" />
@@ -88,7 +88,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
       </div>
 
       <div className="p-6">
-        <div className="hidden md:grid grid-cols-12 gap-2 mb-2 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="hidden md:grid grid-cols-12 gap-2 mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           <div className="col-span-4">Course</div>
           <div className="col-span-1 text-center">Credits</div>
           <div className="col-span-2 text-center">Marks</div>
@@ -115,7 +115,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
         <Button
           variant="outline"
           onClick={() => addCourse(semester.id)}
-          className="mt-4 w-full border-dashed border-slate-300 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all"
+          className="mt-4 w-full border-dashed text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/5 transition-all"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Course
