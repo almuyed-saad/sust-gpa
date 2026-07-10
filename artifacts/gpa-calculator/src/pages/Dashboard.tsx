@@ -304,7 +304,16 @@ export default function Dashboard() {
             <span className="font-semibold text-foreground">SUST GPA Calculator</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Made by <span className="font-semibold text-foreground">Saad</span> — Mathematics student at SUST, Bangladesh.
+            Made by{' '}
+            <a
+              href="https://almuyed-saad.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline underline-offset-2 transition-colors"
+            >
+              Saad
+            </a>{' '}
+            — Mathematics student at SUST, Bangladesh.
           </p>
           <p className="text-xs text-muted-foreground">
             Bangladesh university grading scale · A+ = 4.00, F = 0.00 · Data is{' '}
