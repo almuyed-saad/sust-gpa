@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sust-gpa
+    env: node
+    buildCommand: pnpm install && pnpm --filter @workspace/gpa-calculator run build && pnpm --filter @workspace/api-server run build
+    startCommand: node artifacts/api-server/dist/index.cjs
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        value: 8066135356-1nbtavkqbgglla3179bqse5ccg5fun1j.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
