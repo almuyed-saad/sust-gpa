@@ -109,8 +109,19 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
   res.clearCookie("oauth_state", { path: "/" });
   res.clearCookie("return_to", { path: "/" });
 
-  if (error || !code || !state || state !== expectedState) {
-    res.redirect("/?error=auth_failed");
+  if (error) {
+    console.error("Google OAuth error param:", error);
+    res.redirect(`/?error=auth_failed&reason=${encodeURIComponent(String(error))}`);
+    return;
+  }
+  if (!code || !state) {
+    console.error("Missing code or state. code:", !!code, "state:", !!state);
+    res.redirect("/?error=auth_failed&reason=missing_params");
+    return;
+  }
+  if (state !== expectedState) {
+    console.error("State mismatch. expected:", expectedState, "got:", state);
+    res.redirect("/?error=auth_failed&reason=state_mismatch");
     return;
   }
 
