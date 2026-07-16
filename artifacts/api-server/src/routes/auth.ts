@@ -185,8 +185,9 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
     setSessionCookie(res, sid);
     res.redirect(returnTo);
   } catch (err) {
-    console.error("Google OAuth error:", err);
-    const reason = err instanceof Error ? encodeURIComponent(err.message.slice(0, 80)) : "unknown";
+    console.error("Google OAuth callback error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    const reason = encodeURIComponent(msg.slice(0, 300));
     res.redirect(`/?error=auth_failed&reason=${reason}`);
   }
 });
