@@ -18,14 +18,13 @@ const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
-function getOrigin(req: Request): string {
+function getCallbackUrl(req: Request): string {
+  if (process.env.APP_URL) {
+    return `${process.env.APP_URL}/api/auth/google/callback`;
+  }
   const proto = req.headers["x-forwarded-proto"] || "https";
   const host = req.headers["x-forwarded-host"] || req.headers["host"] || "localhost";
-  return `${proto}://${host}`;
-}
-
-function getCallbackUrl(req: Request): string {
-  return `${getOrigin(req)}/api/auth/google/callback`;
+  return `${proto}://${host}/api/auth/google/callback`;
 }
 
 function setSessionCookie(res: Response, sid: string) {
@@ -141,7 +140,8 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
 
     const tokens = await tokenRes.json() as { access_token: string; error?: string };
     if (!tokenRes.ok || tokens.error) {
-      res.redirect("/?error=auth_failed");
+      console.error("Token exchange failed:", tokens.error, "status:", tokenRes.status);
+      res.redirect(`/?error=auth_failed&reason=token_exchange_${tokens.error || tokenRes.status}`);
       return;
     }
 
@@ -158,7 +158,8 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
     };
 
     if (!profile.sub) {
-      res.redirect("/?error=auth_failed");
+      console.error("No profile.sub in Google response:", profile);
+      res.redirect("/?error=auth_failed&reason=no_profile");
       return;
     }
 
@@ -185,7 +186,8 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
     res.redirect(returnTo);
   } catch (err) {
     console.error("Google OAuth error:", err);
-    res.redirect("/?error=auth_failed");
+    const reason = err instanceof Error ? encodeURIComponent(err.message.slice(0, 80)) : "unknown";
+    res.redirect(`/?error=auth_failed&reason=${reason}`);
   }
 });
 
