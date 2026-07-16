@@ -1,21 +1,20 @@
-import { neon } from "@neondatabase/serverless";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 
 export async function runMigrations() {
-  const sql = neon(process.env.DATABASE_URL!);
-
-  await sql`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "sessions" (
       "sid" varchar PRIMARY KEY,
       "sess" jsonb NOT NULL,
       "expire" timestamp NOT NULL
     )
-  `;
+  `);
 
-  await sql`
+  await db.execute(sql`
     CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "sessions" ("expire")
-  `;
+  `);
 
-  await sql`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "users" (
       "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
       "email" varchar UNIQUE,
@@ -25,9 +24,9 @@ export async function runMigrations() {
       "created_at" timestamptz NOT NULL DEFAULT now(),
       "updated_at" timestamptz NOT NULL DEFAULT now()
     )
-  `;
+  `);
 
-  await sql`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "semesters" (
       "id" text PRIMARY KEY,
       "user_id" text NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
@@ -36,9 +35,9 @@ export async function runMigrations() {
       "created_at" timestamp NOT NULL DEFAULT now(),
       "updated_at" timestamp NOT NULL DEFAULT now()
     )
-  `;
+  `);
 
-  await sql`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "courses" (
       "id" text PRIMARY KEY,
       "semester_id" text NOT NULL REFERENCES "semesters"("id") ON DELETE CASCADE,
@@ -50,7 +49,7 @@ export async function runMigrations() {
       "created_at" timestamp NOT NULL DEFAULT now(),
       "updated_at" timestamp NOT NULL DEFAULT now()
     )
-  `;
+  `);
 
   console.log("Database migrations complete.");
 }
