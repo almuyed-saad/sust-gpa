@@ -18,6 +18,7 @@ app.use("/api", router);
 
 const staticDirCandidates = [
   path.resolve(process.cwd(), "artifacts/gpa-calculator/dist/public"),
+  path.resolve(process.cwd(), "../gpa-calculator/dist/public"),
   path.resolve(process.cwd(), "../../artifacts/gpa-calculator/dist/public"),
 ];
 const staticDir = staticDirCandidates.find((candidate) => existsSync(candidate));
