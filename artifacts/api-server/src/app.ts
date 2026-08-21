@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import { existsSync } from "fs";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import router from "./routes";
 
@@ -15,11 +16,15 @@ app.use(authMiddleware);
 
 app.use("/api", router);
 
+const staticDirCandidates = [
+  path.resolve(process.cwd(), "artifacts/gpa-calculator/dist/public"),
+  path.resolve(process.cwd(), "../../artifacts/gpa-calculator/dist/public"),
+];
+const staticDir = staticDirCandidates.find((candidate) => existsSync(candidate));
 const shouldServeFrontend =
-  process.env.SERVE_FRONTEND === "true" || process.env.NODE_ENV === "production";
+  process.env.SERVE_FRONTEND === "true" || process.env.NODE_ENV === "production" || Boolean(staticDir);
 
-if (shouldServeFrontend) {
-  const staticDir = path.resolve(process.cwd(), "artifacts/gpa-calculator/dist/public");
+if (shouldServeFrontend && staticDir) {
   app.use(express.static(staticDir));
   app.get("/{*splat}", (_req, res) => {
     res.sendFile(path.join(staticDir, "index.html"));
