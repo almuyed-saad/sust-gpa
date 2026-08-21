@@ -12,6 +12,7 @@ function toStoreSemester(s: ApiSemester): Semester {
       name: c.name,
       credits: c.credits,
       marks: c.marks ?? '',
+      gradeLetter: c.gradeLetter ?? '',
     })),
   };
 }
@@ -76,6 +77,7 @@ export function useApiSync() {
         name: course.name,
         credits: typeof course.credits === 'number' ? course.credits : 3,
         marks: typeof course.marks === 'number' ? course.marks : null,
+        gradeLetter: course.gradeLetter || null,
       });
     } catch {}
   }, [isAuthenticated]);

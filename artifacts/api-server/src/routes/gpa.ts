@@ -11,6 +11,10 @@ import {
 
 const router: IRouter = Router();
 
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
+}
+
 function requireAuth(req: Request, res: Response): boolean {
   if (!req.isAuthenticated()) {
     res.status(401).json({ error: "Unauthorized" });
@@ -103,7 +107,7 @@ router.put("/semesters/:semesterId", async (req: Request, res: Response) => {
   }
 
   const userId = req.user!.id;
-  const { semesterId } = req.params;
+  const semesterId = getRouteParam(req.params.semesterId);
 
   const [updated] = await db
     .update(semestersTable)
@@ -124,7 +128,7 @@ router.delete("/semesters/:semesterId", async (req: Request, res: Response) => {
   if (!requireAuth(req, res)) return;
 
   const userId = req.user!.id;
-  const { semesterId } = req.params;
+  const semesterId = getRouteParam(req.params.semesterId);
 
   await db
     .delete(semestersTable)
@@ -143,7 +147,7 @@ router.post("/semesters/:semesterId/courses", async (req: Request, res: Response
   }
 
   const userId = req.user!.id;
-  const { semesterId } = req.params;
+  const semesterId = getRouteParam(req.params.semesterId);
 
   const [semester] = await db
     .select({ id: semestersTable.id })
@@ -186,7 +190,8 @@ router.put("/semesters/:semesterId/courses/:courseId", async (req: Request, res:
   }
 
   const userId = req.user!.id;
-  const { semesterId, courseId } = req.params;
+  const semesterId = getRouteParam(req.params.semesterId);
+  const courseId = getRouteParam(req.params.courseId);
 
   const [semester] = await db
     .select({ id: semestersTable.id })
@@ -222,7 +227,8 @@ router.delete("/semesters/:semesterId/courses/:courseId", async (req: Request, r
   if (!requireAuth(req, res)) return;
 
   const userId = req.user!.id;
-  const { semesterId, courseId } = req.params;
+  const semesterId = getRouteParam(req.params.semesterId);
+  const courseId = getRouteParam(req.params.courseId);
 
   const [semester] = await db
     .select({ id: semestersTable.id })

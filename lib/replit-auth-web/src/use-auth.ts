@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import { useState, useEffect, useCallback } from "react";
 import type { AuthUser } from "@workspace/api-client-react";
 
@@ -43,7 +42,7 @@ export function useAuth(): AuthState {
   }, []);
 
   const login = useCallback(() => {
-    const base = import.meta.env.BASE_URL.replace(/\/+$/, "") || "/";
+    const base = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "") || "/";
     window.location.href = `/api/login?returnTo=${encodeURIComponent(base)}`;
   }, []);
 
