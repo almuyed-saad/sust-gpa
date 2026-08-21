@@ -15,7 +15,10 @@ app.use(authMiddleware);
 
 app.use("/api", router);
 
-if (process.env.NODE_ENV === "production") {
+const shouldServeFrontend =
+  process.env.SERVE_FRONTEND === "true" || process.env.NODE_ENV === "production";
+
+if (shouldServeFrontend) {
   const staticDir = path.resolve(process.cwd(), "artifacts/gpa-calculator/dist/public");
   app.use(express.static(staticDir));
   app.get("/{*splat}", (_req, res) => {
