@@ -8,6 +8,22 @@ SUST GPA is a production-deployed GPA tracker built for students at **Shahjalal 
 
 The project is intentionally scoped as a strong portfolio product rather than an oversized academic information system. Its value comes from the complete product loop: a clear responsive interface, dependable GPA calculations, persisted records, authentication, data portability, printable output, accessible interactions, and automated validation of security boundaries.
 
+## Product preview
+
+The interface is designed mobile-first and scales from a compact phone layout to a wide desktop workspace. The screenshots below were captured from the deployed application and use browser-only sample state; they do not contain private academic records.
+
+### Responsive dashboard
+
+| Mobile | Tablet |
+|---|---|
+| ![SUST GPA mobile dashboard](docs/screenshots/dashboard-mobile.png) | ![SUST GPA tablet dashboard](docs/screenshots/dashboard-tablet.png) |
+
+### Desktop dashboard and printable transcript
+
+| Dashboard | Transcript |
+|---|---|
+| ![SUST GPA desktop dashboard](docs/screenshots/dashboard-desktop.png) | ![SUST GPA printable transcript](docs/screenshots/transcript-desktop.png) |
+
 ## Product overview
 
 A student creates semesters, enters courses and credits, records marks or selects a grade override, and receives continuously updated semester GPA and cumulative GPA calculations. Semester metadata such as academic year, term number, completion status, and notes makes the record useful beyond a single calculation screen.
