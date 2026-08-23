@@ -1,45 +1,21 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { ArrowLeft, CalendarDays, CheckCircle2, Cloud, GraduationCap, Printer, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { CloudSyncResolutionDialog } from "@/components/CloudSyncResolutionDialog";
 import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
+import { useCloudSyncResolution } from "@/hooks/useCloudSyncResolution";
 import { calculateOverallStats, calculateSemesterStats, getGradeInfo } from "@/lib/gpa-utils";
 import { useGpaStore } from "@/lib/store";
 
 export default function Transcript() {
   const semesters = useGpaStore((state) => state.semesters);
-  const loadFromApi = useGpaStore((state) => state.loadFromApi);
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const loaded = useRef(false);
+  const { user, isAuthenticated } = useAuth();
+  const { conflict, isWorking: isSyncWorking, error: syncError, resolve } = useCloudSyncResolution();
   const stats = useMemo(() => calculateOverallStats(semesters), [semesters]);
   const displayName = user?.firstName || user?.email?.split("@")[0] || "Student";
   const generatedDate = new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(new Date());
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && !loaded.current) {
-      loaded.current = true;
-      api.getSemesters()
-        .then(({ semesters: remoteSemesters }) => {
-          loadFromApi(remoteSemesters.map((semester) => ({
-            id: semester.id,
-            name: semester.name,
-            academicYear: semester.academicYear ?? "",
-            termNumber: semester.termNumber ?? 1,
-            status: semester.status === "completed" ? "completed" : "in-progress",
-            notes: semester.notes ?? "",
-            courses: semester.courses.map((course) => ({
-              id: course.id,
-              name: course.name,
-              credits: course.credits,
-              marks: course.marks ?? "",
-              gradeLetter: course.gradeLetter ?? "",
-            })),
-          })));
-        })
-        .catch(console.error);
-    }
-  }, [isAuthenticated, isLoading, loadFromApi]);
 
   const printableSemesters = semesters.map((semester) => ({
     ...semester,
@@ -61,6 +37,15 @@ export default function Transcript() {
           </Button>
         </div>
       </div>
+
+      <CloudSyncResolutionDialog conflict={conflict} isWorking={isSyncWorking} error={syncError} onResolve={(choice) => { void resolve(choice); }} />
+
+      {syncError && !conflict && (
+        <div className="mx-auto mt-4 flex max-w-[1000px] items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-4 py-3 text-sm text-amber-900 dark:text-amber-200" role="alert">
+          <Cloud className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{syncError}</span>
+        </div>
+      )}
 
       <main className="mx-auto max-w-[1000px] px-4 py-8 sm:px-6 sm:py-12">
         <article className="transcript-page overflow-hidden rounded-2xl border border-border/80 bg-card shadow-lg shadow-slate-950/5 print:rounded-none print:border-0 print:shadow-none">

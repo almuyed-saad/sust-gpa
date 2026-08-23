@@ -25,13 +25,14 @@ import {
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/DashboardStats";
+import { CloudSyncResolutionDialog } from "@/components/CloudSyncResolutionDialog";
 import { DataPortability } from "@/components/DataPortability";
 import { GpaGoalPlanner } from "@/components/GpaGoalPlanner";
 import { GradingScale } from "@/components/GradingScale";
 import { SemesterCard } from "@/components/SemesterCard";
 import { useAuth, login, logout } from "@/hooks/useAuth";
+import { useCloudSyncResolution } from "@/hooks/useCloudSyncResolution";
 import { useGpaActions } from "@/hooks/useGpaActions";
-import { api } from "@/lib/api";
 import { calculateSemesterStats } from "@/lib/gpa-utils";
 import { useGpaStore } from "@/lib/store";
 import { THEMES, Theme, useTheme } from "@/lib/theme";
@@ -227,36 +228,11 @@ function GpaChart() {
 export default function Dashboard() {
   const semesters = useGpaStore((state) => state.semesters);
   const prefersReducedMotion = useReducedMotion();
-  const loadFromApi = useGpaStore((state) => state.loadFromApi);
   const { addSemester } = useGpaActions();
+  const { conflict, isWorking: isSyncWorking, error: syncError, resolve } = useCloudSyncResolution();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const loaded = useRef(false);
   const displayName = user?.firstName || user?.email?.split("@")[0] || "Student";
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && !loaded.current) {
-      loaded.current = true;
-      api.getSemesters()
-        .then(({ semesters: remoteSemesters }) => {
-          loadFromApi(remoteSemesters.map((semester) => ({
-            id: semester.id,
-            name: semester.name,
-            academicYear: semester.academicYear ?? "",
-            termNumber: semester.termNumber ?? 1,
-            status: semester.status === "completed" ? "completed" : "in-progress",
-            notes: semester.notes ?? "",
-            courses: semester.courses.map((course) => ({
-              id: course.id,
-              name: course.name,
-              credits: course.credits,
-              marks: course.marks ?? "",
-              gradeLetter: course.gradeLetter ?? "",
-            })),
-          })));
-        })
-        .catch(console.error);
-    }
-  }, [isAuthenticated, isLoading, loadFromApi]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -284,9 +260,9 @@ export default function Dashboard() {
               <div className="h-10 w-10 animate-pulse rounded-xl bg-muted" aria-label="Loading account" />
             ) : isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <div className="hidden items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 sm:flex">
-                  <Cloud className="h-3.5 w-3.5" />
-                  Synced
+                <div className={`hidden items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold sm:flex ${conflict ? "border-amber-500/25 bg-amber-500/8 text-amber-700 dark:text-amber-300" : "border-emerald-500/20 bg-emerald-500/8 text-emerald-700 dark:text-emerald-300"}`}>
+                  {conflict ? <CloudOff className="h-3.5 w-3.5" /> : <Cloud className="h-3.5 w-3.5" />}
+                  {conflict ? "Review sync" : "Synced"}
                 </div>
                 <div className="hidden items-center gap-2 md:flex">
                   {user?.profileImageUrl ? <img src={user.profileImageUrl} alt={displayName} className="h-9 w-9 rounded-xl border border-border object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary"><User className="h-4 w-4" /></div>}
@@ -322,6 +298,13 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
+
+        {syncError && !conflict && (
+          <div className="mb-8 flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-4 py-3 text-sm text-amber-900 dark:text-amber-200" role="alert">
+            <CloudOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{syncError}</span>
+          </div>
+        )}
 
         {!isAuthenticated && !isLoading && (
           <motion.div initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : 0.2 }} className="mb-8 flex flex-col gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
@@ -381,11 +364,13 @@ export default function Dashboard() {
         </div>
       </main>
 
+      <CloudSyncResolutionDialog conflict={conflict} isWorking={isSyncWorking} error={syncError} onResolve={(choice) => { void resolve(choice); }} />
+
       <footer className="border-t border-border/70 bg-card/60">
         <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 font-semibold text-foreground"><div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Calculator className="h-3.5 w-3.5" /></div>SUST GPA</div>
           <p>Made by <a href="https://almuyed-saad.netlify.app/" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">Saad</a> · Mathematics student at SUST, Bangladesh.</p>
-          <p className="text-xs">{isAuthenticated ? <span className="font-semibold text-emerald-600 dark:text-emerald-300">Cloud synced</span> : <span className="font-semibold text-amber-600 dark:text-amber-300">Browser-only mode</span>}</p>
+          <p className="text-xs">{conflict ? <span className="font-semibold text-amber-600 dark:text-amber-300">Sync choice needed</span> : isAuthenticated ? <span className="font-semibold text-emerald-600 dark:text-emerald-300">Cloud synced</span> : <span className="font-semibold text-amber-600 dark:text-amber-300">Browser-only mode</span>}</p>
         </div>
       </footer>
     </div>

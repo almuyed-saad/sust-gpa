@@ -7,6 +7,7 @@ import {
 } from "../../artifacts/gpa-calculator/src/lib/gpa-utils.ts";
 import type { Course, Semester } from "../../artifacts/gpa-calculator/src/lib/store.ts";
 import { createCsvExport, parseRecordBackup, serializeRecordBackup } from "../../artifacts/gpa-calculator/src/lib/portable-record.ts";
+import { hasMeaningfulRecord, mergeSemesters } from "../../artifacts/gpa-calculator/src/lib/sync-resolution.ts";
 
 function closeTo(actual: number, expected: number, message: string) {
   assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: expected ${expected}, received ${actual}`);
@@ -105,5 +106,44 @@ assert.throws(() => parseRecordBackup(JSON.stringify({ format: "other", version:
 const csv = createCsvExport(semesters);
 assert.match(csv, /Semester,Academic Year,Term,Status,Notes,Course,Credits,Marks,Grade,Grade Point/);
 assert.match(csv, /Semester 1,2025-26,1,completed,Strong start,Test Course,3,,A\+,4\.00/);
+
+const emptyLegacyRecord: Semester[] = [{
+  id: "empty",
+  name: "Year 1, Semester 1",
+  academicYear: "2025-26",
+  termNumber: 1,
+  status: "in-progress",
+  notes: "",
+  courses: [course({ name: "", credits: 3, marks: "", gradeLetter: "" })],
+}];
+assert.equal(hasMeaningfulRecord(emptyLegacyRecord), false, "a blank starter record should not trigger a sync conflict");
+assert.equal(hasMeaningfulRecord([semesters[0]!]), true, "a populated record should trigger a sync conflict");
+
+const localSyncRecord: Semester = {
+  id: "local-semester",
+  name: "Semester 1",
+  academicYear: "2025-26",
+  termNumber: 1,
+  status: "in-progress",
+  notes: "Local note",
+  courses: [course({ id: "local-course", name: "Algebra", gradeLetter: "A" })],
+};
+const remoteSyncRecord: Semester = {
+  id: "remote-semester",
+  name: "Semester 1",
+  academicYear: "2025-26",
+  termNumber: 1,
+  status: "completed",
+  notes: "Cloud note",
+  courses: [
+    course({ id: "remote-course-duplicate", name: "Algebra", gradeLetter: "A" }),
+    course({ id: "remote-course-new", name: "Analysis", gradeLetter: "B" }),
+  ],
+};
+const merged = mergeSemesters([localSyncRecord], [remoteSyncRecord]);
+assert.equal(merged.length, 1);
+assert.equal(merged[0]?.courses.length, 2, "matching courses should not be duplicated during merge");
+assert.equal(merged[0]?.status, "completed", "completed status should win during merge");
+assert.equal(merged[0]?.notes, "Local note", "local notes should be preserved when present");
 
 console.log("SUST GPA regression checks passed.");
