@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "wouter";
 import {
   ArrowUpRight,
   Calculator,
   ChartSpline,
   Check,
+  ClipboardList,
   ChevronDown,
   Cloud,
   CloudOff,
@@ -267,6 +269,7 @@ export default function Dashboard() {
           <nav className="hidden items-center gap-6 text-sm font-semibold text-muted-foreground lg:flex" aria-label="Dashboard sections">
             <a href="#record" className="transition-colors hover:text-foreground">Academic record</a>
             <a href="#grading-scale" className="transition-colors hover:text-foreground">Grading scale</a>
+            <Link href="/transcript" className="transition-colors hover:text-foreground">Transcript</Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -334,6 +337,10 @@ export default function Dashboard() {
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <DataPortability />
+                <Link href="/transcript" className="inline-flex h-11 items-center gap-2 rounded-xl border border-border/80 bg-card px-3 text-xs font-bold text-foreground shadow-xs transition-colors hover:bg-muted sm:px-4 sm:text-sm">
+                  <ClipboardList className="h-4 w-4 text-primary" />
+                  Transcript
+                </Link>
                 <Button onClick={addSemester} className="h-11 rounded-xl px-4 shadow-md shadow-primary/15"><span className="mr-2 text-lg leading-none">+</span> Add semester</Button>
               </div>
             </div>

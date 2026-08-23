@@ -428,3 +428,71 @@ html.theme-transition body * {
   transition-duration: 220ms !important;
   transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1) !important;
 }
+
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .transcript-page {
+    width: 100% !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .transcript-page > header {
+    background: #eef2ff !important;
+    color: #0f172a !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .transcript-page > header * {
+    color: #0f172a !important;
+  }
+
+  .transcript-page [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  .transcript-page [class*="bg-card"],
+  .transcript-page [class*="bg-muted"] {
+    background: #ffffff !important;
+  }
+
+  .transcript-page [class*="border-"] {
+    border-color: #cbd5e1 !important;
+  }
+
+  .transcript-page [class*="text-muted-foreground"] {
+    color: #475569 !important;
+  }
+
+  .transcript-page [class*="text-primary"] {
+    color: #3730a3 !important;
+  }
+
+  .transcript-semester {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .transcript-semester table {
+    break-inside: auto;
+  }
+}
