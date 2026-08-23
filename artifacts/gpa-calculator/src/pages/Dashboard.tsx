@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowUpRight,
@@ -45,6 +45,7 @@ function ThemeIcon({ theme, className = "h-4 w-4" }: { theme: Theme; className?:
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const prefersReducedMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -103,10 +104,10 @@ function ThemeToggle() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.23, 1, 0.32, 1] }}
             className="absolute right-0 z-[100] mt-2 w-[min(250px,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-xl shadow-slate-950/10 dark:shadow-black/30"
             role="menu"
             aria-label="Choose appearance theme"
@@ -225,6 +226,7 @@ function GpaChart() {
 
 export default function Dashboard() {
   const semesters = useGpaStore((state) => state.semesters);
+  const prefersReducedMotion = useReducedMotion();
   const loadFromApi = useGpaStore((state) => state.loadFromApi);
   const { addSemester } = useGpaActions();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -322,7 +324,7 @@ export default function Dashboard() {
         </section>
 
         {!isAuthenticated && !isLoading && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-col gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
+          <motion.div initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : 0.2 }} className="mb-8 flex flex-col gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300"><CloudOff className="h-4 w-4" /></div>
             <p className="text-sm leading-5 text-foreground"><span className="font-bold">You’re in local mode.</span> Your progress stays in this browser. Sign in to sync it across devices.</p>
             <Button size="sm" variant="outline" onClick={login} className="rounded-xl border-amber-500/30 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200 sm:ml-auto">Sign in to sync</Button>
@@ -352,7 +354,7 @@ export default function Dashboard() {
             <div className="space-y-5">
               <AnimatePresence mode="popLayout">
                 {semesters.length === 0 ? (
-                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-dashed border-primary/30 bg-primary/[0.03] px-5 py-12 text-center sm:py-16">
+                  <motion.div initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : 0.2 }} className="rounded-2xl border border-dashed border-primary/30 bg-primary/[0.03] px-5 py-12 text-center sm:py-16">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary"><GraduationCap className="h-7 w-7" /></div>
                     <h3 className="mt-5 font-display text-lg font-bold text-foreground">Start your academic record</h3>
                     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Create your first semester, add your courses, and let the tracker calculate the rest.</p>
@@ -360,7 +362,7 @@ export default function Dashboard() {
                   </motion.div>
                 ) : (
                   semesters.map((semester) => (
-                    <motion.div key={semester.id} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}>
+                    <motion.div key={semester.id} layout={!prefersReducedMotion} initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.97 }} transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: [0.23, 1, 0.32, 1] }}>
                       <SemesterCard semester={semester} />
                     </motion.div>
                   ))

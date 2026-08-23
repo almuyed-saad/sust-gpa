@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Edit3, FileText, Plus, StickyNote, Trash2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ interface SemesterCardProps {
 
 export function SemesterCard({ semester }: SemesterCardProps) {
   const { addCourse, removeSemester, updateSemesterName, updateSemesterMetadata } = useGpaActions();
+  const prefersReducedMotion = useReducedMotion();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(semester.name);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -206,10 +207,10 @@ export function SemesterCard({ semester }: SemesterCardProps) {
       <AnimatePresence initial={false}>
         {!isCollapsed && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: [0.23, 1, 0.32, 1] }}
           >
             <div className="p-4 sm:p-6">
               <div className="mb-3 hidden grid-cols-[minmax(0,1fr)_88px_118px_minmax(210px,1.1fr)_70px_36px] items-center gap-3 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground lg:grid">
@@ -226,10 +227,10 @@ export function SemesterCard({ semester }: SemesterCardProps) {
                   {semester.courses.map((course) => (
                     <motion.div
                       key={course.id}
-                      initial={{ opacity: 0, y: -8 }}
+                      initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+                      transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.23, 1, 0.32, 1] }}
                     >
                       <CourseRow semesterId={semester.id} course={course} />
                     </motion.div>

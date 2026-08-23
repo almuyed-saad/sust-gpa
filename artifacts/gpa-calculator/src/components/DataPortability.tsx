@@ -101,7 +101,7 @@ export function DataPortability() {
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <input ref={fileInputRef} type="file" accept=".json,application/json" className="sr-only" onChange={handleFileChange} aria-label="Import SUST GPA JSON backup" />
+      <input ref={fileInputRef} type="file" accept=".json,application/json" className="sr-only" tabIndex={-1} onChange={handleFileChange} aria-label="Import SUST GPA JSON backup" />
       <Button
         variant="outline"
         size="sm"
