@@ -419,3 +419,12 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+html.theme-transition,
+html.theme-transition body,
+html.theme-transition body * {
+  transition-property: color, background-color, border-color, box-shadow, fill, stroke !important;
+  transition-duration: 220ms !important;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1) !important;
+}

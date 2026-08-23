@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 export type Theme = "light" | "dark" | "ocean" | "sunset";
 
 interface ThemeContextType {
   theme: Theme;
-  setTheme: (t: Theme) => void;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -17,26 +17,43 @@ const STORAGE_KEY = "sust-gpa-theme";
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      return (localStorage.getItem(STORAGE_KEY) as Theme) || "light";
+      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+      return stored && THEMES.some((item) => item.id === stored) ? stored : "light";
     } catch {
       return "light";
     }
   });
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute("data-theme", theme);
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    root.classList.toggle("dark", theme === "dark");
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {}
   }, [theme]);
 
-  const setTheme = (t: Theme) => setThemeState(t);
+  useEffect(() => () => {
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+  }, []);
+
+  const setTheme = (nextTheme: Theme) => {
+    if (nextTheme === theme) return;
+    const root = document.documentElement;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (!reducedMotion) {
+      root.classList.add("theme-transition");
+      if (transitionTimer.current) clearTimeout(transitionTimer.current);
+      transitionTimer.current = setTimeout(() => {
+        root.classList.remove("theme-transition");
+        transitionTimer.current = null;
+      }, 240);
+    }
+
+    setThemeState(nextTheme);
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -49,9 +66,9 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export const THEMES: { id: Theme; label: string; emoji: string }[] = [
-  { id: "light", label: "Light", emoji: "☀️" },
-  { id: "dark",  label: "Dark",  emoji: "🌙" },
-  { id: "ocean", label: "Ocean", emoji: "🌊" },
-  { id: "sunset",label: "Sunset",emoji: "🌸" },
+export const THEMES: { id: Theme; label: string; emoji: string; description: string }[] = [
+  { id: "light", label: "Light", emoji: "☀️", description: "Bright and focused" },
+  { id: "dark", label: "Dark", emoji: "🌙", description: "Easy on the eyes" },
+  { id: "ocean", label: "Ocean", emoji: "🌊", description: "Cool and calm" },
+  { id: "sunset", label: "Sunset", emoji: "🌸", description: "Warm and creative" },
 ];

@@ -4,14 +4,21 @@ import {
   ArrowUpRight,
   Calculator,
   ChartSpline,
+  Check,
+  ChevronDown,
   Cloud,
   CloudOff,
+  Flower2,
   GraduationCap,
   LogIn,
   LogOut,
+  Moon,
+  Palette,
   ShieldCheck,
   Sparkles,
+  Sun,
   User,
+  Waves,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -26,60 +33,141 @@ import { calculateSemesterStats } from "@/lib/gpa-utils";
 import { useGpaStore } from "@/lib/store";
 import { THEMES, Theme, useTheme } from "@/lib/theme";
 
+function ThemeIcon({ theme, className = "h-4 w-4" }: { theme: Theme; className?: string }) {
+  if (theme === "dark") return <Moon className={className} />;
+  if (theme === "ocean") return <Waves className={className} />;
+  if (theme === "sunset") return <Flower2 className={className} />;
+  return <Sun className={className} />;
+}
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const current = THEMES.find((item) => item.id === theme) ?? THEMES[0];
+  const currentIndex = THEMES.findIndex((item) => item.id === theme);
 
   useEffect(() => {
-    function handleClick(event: MouseEvent) {
+    function handlePointerDown(event: PointerEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
+
+  const focusOption = (index: number) => {
+    setOpen(true);
+    window.setTimeout(() => optionRefs.current[index]?.focus(), 0);
+  };
 
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/70 bg-card px-3 text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label="Choose appearance theme"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            focusOption(currentIndex >= 0 ? currentIndex : 0);
+          }
+        }}
+        className={`group inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-sm font-bold shadow-xs transition-all duration-200 hover:-translate-y-px hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${open ? "border-primary/40 bg-primary/5 text-primary shadow-sm" : "border-border/70 bg-card text-foreground"}`}
+        aria-label={`Appearance: ${current.label}. Choose theme`}
+        aria-haspopup="menu"
         aria-expanded={open}
       >
-        <span className="text-base leading-none" aria-hidden="true">{current.emoji}</span>
-        <span className="hidden sm:inline">{current.label}</span>
-        <svg className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
-        </svg>
+        <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105" aria-hidden="true">
+          <ThemeIcon theme={theme} className="h-3.5 w-3.5" />
+        </span>
+        <span className="hidden min-[420px]:inline text-muted-foreground">Theme</span>
+        <span>{current.label}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-            className="absolute right-0 z-[100] mt-2 w-40 overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-lg"
+            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+            className="absolute right-0 z-[100] mt-2 w-[min(250px,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-xl shadow-slate-950/10 dark:shadow-black/30"
+            role="menu"
+            aria-label="Choose appearance theme"
           >
-            {THEMES.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setTheme(item.id as Theme);
-                  setOpen(false);
-                }}
-                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${theme === item.id ? "bg-primary/10 font-bold text-primary" : "text-foreground hover:bg-muted"}`}
-              >
-                <span className="text-base" aria-hidden="true">{item.emoji}</span>
-                {item.label}
-                {theme === item.id && <span className="ml-auto text-xs">✓</span>}
-              </button>
-            ))}
+            <div className="mb-1 flex items-center gap-2 px-2.5 pb-2 pt-1">
+              <div className="rounded-lg bg-primary/10 p-1.5 text-primary"><Palette className="h-3.5 w-3.5" /></div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-foreground">Appearance</p>
+                <p className="text-[11px] text-muted-foreground">Personalize your workspace</p>
+              </div>
+            </div>
+            <div className="space-y-1 border-t border-border/70 pt-2">
+              {THEMES.map((item, index) => {
+                const selected = theme === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    ref={(node) => { optionRefs.current[index] = node; }}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={selected}
+                    onClick={() => {
+                      setTheme(item.id);
+                      setOpen(false);
+                      triggerRef.current?.focus();
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        focusOption((index + 1) % THEMES.length);
+                      }
+                      if (event.key === "ArrowUp") {
+                        event.preventDefault();
+                        focusOption((index - 1 + THEMES.length) % THEMES.length);
+                      }
+                      if (event.key === "Home") {
+                        event.preventDefault();
+                        focusOption(0);
+                      }
+                      if (event.key === "End") {
+                        event.preventDefault();
+                        focusOption(THEMES.length - 1);
+                      }
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setTheme(item.id);
+                        setOpen(false);
+                        triggerRef.current?.focus();
+                      }
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all duration-150 ${selected ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}
+                  >
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${selected ? "border-primary/25 bg-background text-primary" : "border-border/70 bg-muted/55 text-muted-foreground"}`}>
+                      <ThemeIcon theme={item.id} className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold">{item.label}</span>
+                      <span className="block truncate text-[11px] text-muted-foreground">{item.description}</span>
+                    </span>
+                    {selected && <Check className="h-4 w-4 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
