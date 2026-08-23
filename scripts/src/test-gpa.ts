@@ -6,6 +6,7 @@ import {
   getGradeInfoFromMarks,
 } from "../../artifacts/gpa-calculator/src/lib/gpa-utils.ts";
 import type { Course, Semester } from "../../artifacts/gpa-calculator/src/lib/store.ts";
+import { createCsvExport, parseRecordBackup, serializeRecordBackup } from "../../artifacts/gpa-calculator/src/lib/portable-record.ts";
 
 function closeTo(actual: number, expected: number, message: string) {
   assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: expected ${expected}, received ${actual}`);
@@ -67,5 +68,34 @@ const overall = calculateOverallStats(semesters);
 closeTo(overall.cgpa, 3.5, "overall CGPA should combine all completed courses");
 assert.equal(overall.totalCredits, 6);
 assert.equal(overall.totalCourses, 2);
+
+const backupText = serializeRecordBackup(semesters);
+const parsedBackup = parseRecordBackup(backupText);
+assert.equal(parsedBackup.backup.format, "sust-gpa-record");
+assert.equal(parsedBackup.backup.version, 1);
+assert.equal(parsedBackup.backup.semesters.length, 2);
+assert.equal(parsedBackup.backup.semesters[0]?.courses[0]?.gradeLetter, "A+");
+assert.notEqual(parsedBackup.backup.semesters[0]?.id, "semester-1", "imports should generate fresh local IDs");
+assert.equal(parsedBackup.warnings.length, 0);
+
+const normalized = parseRecordBackup(JSON.stringify({
+  format: "sust-gpa-record",
+  version: 1,
+  semesters: [{
+    name: "  Semester with override  ",
+    courses: [{ name: "  Course  ", credits: 3, marks: 42, gradeLetter: "a+" }],
+  }],
+}));
+assert.equal(normalized.backup.semesters[0]?.name, "Semester with override");
+assert.equal(normalized.backup.semesters[0]?.courses[0]?.name, "Course");
+assert.equal(normalized.backup.semesters[0]?.courses[0]?.gradeLetter, "A+");
+assert.equal(normalized.backup.semesters[0]?.courses[0]?.marks, "", "grade letter should take precedence over marks");
+assert.equal(normalized.warnings.length, 1);
+assert.throws(() => parseRecordBackup("not-json"), /valid JSON/);
+assert.throws(() => parseRecordBackup(JSON.stringify({ format: "other", version: 1, semesters: [] })), /compatible/);
+
+const csv = createCsvExport(semesters);
+assert.match(csv, /Semester,Course,Credits,Marks,Grade,Grade Point/);
+assert.match(csv, /Semester 1,Test Course,3,,A\+,4\.00/);
 
 console.log("SUST GPA regression checks passed.");

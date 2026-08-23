@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
-import { useGpaStore, type Course } from "@/lib/store";
+import { useGpaStore, type Course, type Semester } from "@/lib/store";
 
 function mapApiCourse(c: { id: string; name: string; credits: number; marks: number | null; gradeLetter?: string | null }): Course {
   return {
@@ -100,5 +100,43 @@ export function useGpaActions() {
     store.clearAll();
   }, [store]);
 
-  return { addSemester, removeSemester, updateSemesterName, addCourse, removeCourse, updateCourse, clearAll };
+  const importSemesters = useCallback(async (semesters: Semester[]) => {
+    if (!isAuthenticated) {
+      store.loadFromApi(semesters);
+      return;
+    }
+
+    const { semesters: remoteSemesters } = await api.getSemesters();
+    for (const remoteSemester of remoteSemesters) {
+      await api.deleteSemester(remoteSemester.id);
+    }
+
+    const importedSemesters: Semester[] = [];
+    for (const semester of semesters) {
+      const { semester: createdSemester } = await api.createSemester(semester.name);
+      const seedCourse = createdSemester.courses[0];
+      if (seedCourse) await api.deleteCourse(createdSemester.id, seedCourse.id);
+
+      const importedCourses: Course[] = [];
+      for (const course of semester.courses) {
+        const { course: createdCourse } = await api.createCourse(createdSemester.id, {
+          name: course.name,
+          credits: typeof course.credits === "number" && course.credits > 0 ? course.credits : 3,
+          marks: typeof course.marks === "number" ? course.marks : null,
+          gradeLetter: course.gradeLetter || null,
+        });
+        importedCourses.push(mapApiCourse(createdCourse));
+      }
+
+      importedSemesters.push({
+        id: createdSemester.id,
+        name: createdSemester.name,
+        courses: importedCourses,
+      });
+    }
+
+    store.loadFromApi(importedSemesters);
+  }, [isAuthenticated, store]);
+
+  return { addSemester, removeSemester, updateSemesterName, addCourse, removeCourse, updateCourse, clearAll, importSemesters };
 }

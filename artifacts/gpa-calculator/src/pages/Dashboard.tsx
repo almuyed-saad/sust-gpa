@@ -23,6 +23,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/DashboardStats";
+import { DataPortability } from "@/components/DataPortability";
 import { GpaGoalPlanner } from "@/components/GpaGoalPlanner";
 import { GradingScale } from "@/components/GradingScale";
 import { SemesterCard } from "@/components/SemesterCard";
@@ -331,7 +332,10 @@ export default function Dashboard() {
                 <h2 id="record-heading" className="mt-1 font-display text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Academic record</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Add semesters and enter course results as they become available.</p>
               </div>
-              <Button onClick={addSemester} className="h-11 rounded-xl px-4 shadow-md shadow-primary/15"><span className="mr-2 text-lg leading-none">+</span> Add semester</Button>
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <DataPortability />
+                <Button onClick={addSemester} className="h-11 rounded-xl px-4 shadow-md shadow-primary/15"><span className="mr-2 text-lg leading-none">+</span> Add semester</Button>
+              </div>
             </div>
 
             <div className="space-y-5">
