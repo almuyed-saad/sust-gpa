@@ -3,7 +3,7 @@ import { GRADE_OPTIONS } from "./gpa-utils";
 import type { Course, Semester } from "./store";
 
 export const RECORD_FORMAT = "sust-gpa-record";
-export const RECORD_VERSION = 1;
+export const RECORD_VERSION = 2;
 
 export interface RecordBackup {
   format: typeof RECORD_FORMAT;
@@ -46,6 +46,11 @@ function normalizeCourse(raw: unknown, courseIndex: number, warnings: string[]):
 function normalizeSemester(raw: unknown, semesterIndex: number, warnings: string[]): Semester {
   const source = isRecord(raw) ? raw : {};
   const rawCourses = Array.isArray(source.courses) ? source.courses : [];
+  const rawTerm = source.termNumber;
+  const termNumber = typeof rawTerm === "number" && Number.isInteger(rawTerm) && rawTerm >= 1 && rawTerm <= 3 ? rawTerm : (semesterIndex % 3) + 1;
+  const status = source.status === "completed" ? "completed" : "in-progress";
+  const academicYear = typeof source.academicYear === "string" ? source.academicYear.trim().slice(0, 30) : "";
+  const notes = typeof source.notes === "string" ? source.notes.trim().slice(0, 1000) : "";
   if (rawCourses.length > 100) warnings.push(`Semester ${semesterIndex + 1}: only the first 100 courses were imported.`);
 
   return {
@@ -53,6 +58,10 @@ function normalizeSemester(raw: unknown, semesterIndex: number, warnings: string
     name: typeof source.name === "string" && source.name.trim()
       ? source.name.trim().slice(0, 120)
       : `Semester ${semesterIndex + 1}`,
+    academicYear,
+    termNumber,
+    status,
+    notes,
     courses: rawCourses.slice(0, 100).map((course, courseIndex) => normalizeCourse(course, courseIndex, warnings)),
   };
 }
@@ -65,6 +74,10 @@ export function createRecordBackup(semesters: Semester[]): RecordBackup {
     semesters: semesters.map((semester) => ({
       id: semester.id,
       name: semester.name,
+      academicYear: semester.academicYear,
+      termNumber: semester.termNumber,
+      status: semester.status,
+      notes: semester.notes,
       courses: semester.courses.map((course) => ({ ...course })),
     })),
   };
@@ -82,7 +95,7 @@ export function parseRecordBackup(rawText: string): ParsedRecordBackup {
     throw new Error("This file is not valid JSON.");
   }
 
-  if (!isRecord(parsed) || parsed.format !== RECORD_FORMAT || parsed.version !== RECORD_VERSION || !Array.isArray(parsed.semesters)) {
+  if (!isRecord(parsed) || parsed.format !== RECORD_FORMAT || ![1, RECORD_VERSION].includes(parsed.version as number) || !Array.isArray(parsed.semesters)) {
     throw new Error("This is not a compatible SUST GPA backup file.");
   }
   if (parsed.semesters.length > 100) throw new Error("A backup can contain at most 100 semesters.");
@@ -106,13 +119,13 @@ function escapeCsvCell(value: string | number): string {
 }
 
 export function createCsvExport(semesters: Semester[]): string {
-  const rows: Array<Array<string | number>> = [["Semester", "Course", "Credits", "Marks", "Grade", "Grade Point"]];
+  const rows: Array<Array<string | number>> = [["Semester", "Academic Year", "Term", "Status", "Notes", "Course", "Credits", "Marks", "Grade", "Grade Point"]];
   semesters.forEach((semester) => {
     semester.courses.forEach((course) => {
       const grade = course.gradeLetter || "";
       const marks = course.marks === "" ? "" : course.marks;
       const gradePoint = grade || marks !== "" ? getGradePoint(course) : "";
-      rows.push([semester.name, course.name, course.credits, marks, grade, gradePoint]);
+      rows.push([semester.name, semester.academicYear, semester.termNumber, semester.status, semester.notes, course.name, course.credits, marks, grade, gradePoint]);
     });
   });
   return rows.map((row) => row.map(escapeCsvCell).join(",")).join("\n");

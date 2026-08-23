@@ -1,12 +1,16 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { api, ApiSemester } from "@/lib/api";
-import { useGpaStore, Course, Semester } from "@/lib/store";
+import { getCurrentAcademicYear, useGpaStore, Course, Semester } from "@/lib/store";
 
 function toStoreSemester(s: ApiSemester): Semester {
   return {
     id: s.id,
     name: s.name,
+    academicYear: s.academicYear ?? getCurrentAcademicYear(),
+    termNumber: s.termNumber ?? 1,
+    status: s.status === "completed" ? "completed" : "in-progress",
+    notes: s.notes ?? "",
     courses: s.courses.map((c) => ({
       id: c.id,
       name: c.name,
@@ -34,7 +38,7 @@ export function useApiSync() {
   const syncAddSemester = useCallback(async (localId: string, name: string) => {
     if (!isAuthenticated) return localId;
     try {
-      const { semester } = await api.createSemester(name);
+      const { semester } = await api.createSemester({ name });
       return semester.id;
     } catch {
       return localId;
@@ -48,7 +52,7 @@ export function useApiSync() {
 
   const syncUpdateSemesterName = useCallback(async (id: string, name: string) => {
     if (!isAuthenticated) return;
-    try { await api.updateSemester(id, name); } catch {}
+    try { await api.updateSemester(id, { name }); } catch {}
   }, [isAuthenticated]);
 
   const syncAddCourse = useCallback(async (semesterId: string, localCourseId: string) => {

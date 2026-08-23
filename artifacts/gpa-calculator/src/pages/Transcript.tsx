@@ -24,6 +24,10 @@ export default function Transcript() {
           loadFromApi(remoteSemesters.map((semester) => ({
             id: semester.id,
             name: semester.name,
+            academicYear: semester.academicYear ?? "",
+            termNumber: semester.termNumber ?? 1,
+            status: semester.status === "completed" ? "completed" : "in-progress",
+            notes: semester.notes ?? "",
             courses: semester.courses.map((course) => ({
               id: course.id,
               name: course.name,
@@ -111,9 +115,15 @@ export default function Transcript() {
                     <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                       <div>
                         <h3 className="font-display text-base font-extrabold text-foreground sm:text-lg">{semester.name}</h3>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{semester.courses.length} {semester.courses.length === 1 ? "course" : "courses"} recorded</p>
+                        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                          <span>{semester.courses.length} {semester.courses.length === 1 ? "course" : "courses"} recorded</span>
+                          <span className="text-border">·</span>
+                          <span>{semester.academicYear || "Academic year not set"} · Term {semester.termNumber}</span>
+                        </p>
+                        {semester.notes && <p className="mt-2 max-w-2xl text-xs leading-5 text-muted-foreground">{semester.notes}</p>}
                       </div>
-                      <div className="flex items-center gap-2 text-xs font-bold">
+                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold sm:justify-end">
+                        <span className={`rounded-lg border px-3 py-2 ${semester.status === "completed" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>{semester.status === "completed" ? "Completed" : "In progress"}</span>
                         <span className="rounded-lg border border-border bg-card px-3 py-2 text-muted-foreground">{semester.stats.totalCredits} credits</span>
                         <span className="rounded-lg border border-primary/20 bg-primary/8 px-3 py-2 text-primary">GPA {semester.stats.gpa.toFixed(2)}</span>
                       </div>

@@ -37,6 +37,11 @@ export async function runMigrations() {
     )
   `);
 
+  await db.execute(sql`ALTER TABLE "semesters" ADD COLUMN IF NOT EXISTS "academic_year" text NOT NULL DEFAULT ''`);
+  await db.execute(sql`ALTER TABLE "semesters" ADD COLUMN IF NOT EXISTS "term_number" integer NOT NULL DEFAULT 1`);
+  await db.execute(sql`ALTER TABLE "semesters" ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'in-progress'`);
+  await db.execute(sql`ALTER TABLE "semesters" ADD COLUMN IF NOT EXISTS "notes" text`);
+
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "courses" (
       "id" text PRIMARY KEY,

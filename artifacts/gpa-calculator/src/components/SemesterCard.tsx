@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Check, ChevronDown, Edit3, FileText, Plus, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CalendarDays, Check, ChevronDown, Edit3, FileText, Plus, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,15 @@ interface SemesterCardProps {
 }
 
 export function SemesterCard({ semester }: SemesterCardProps) {
-  const { addCourse, removeSemester, updateSemesterName } = useGpaActions();
+  const { addCourse, removeSemester, updateSemesterName, updateSemesterMetadata } = useGpaActions();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(semester.name);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [tempNotes, setTempNotes] = useState(semester.notes);
+
+  useEffect(() => {
+    setTempNotes(semester.notes);
+  }, [semester.id, semester.notes]);
 
   const stats = calculateSemesterStats(semester.courses);
 
@@ -77,7 +82,17 @@ export function SemesterCard({ semester }: SemesterCardProps) {
                   <Edit3 className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-60 transition-opacity group-hover:opacity-100" />
                 </button>
               )}
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${semester.status === "completed" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${semester.status === "completed" ? "bg-emerald-500" : "bg-amber-500"}`} />
+                  {semester.status === "completed" ? "Completed" : "In progress"}
+                </span>
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {semester.academicYear || "Academic year not set"} · Term {semester.termNumber}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
                 {semester.courses.length} {semester.courses.length === 1 ? "course" : "courses"} · Tap the title to rename
               </p>
             </div>
@@ -135,6 +150,56 @@ export function SemesterCard({ semester }: SemesterCardProps) {
           <div className="col-span-2 ml-auto hidden text-xs text-muted-foreground sm:block">
             Weighted average across completed courses
           </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 rounded-2xl border border-border/70 bg-card/70 p-3 sm:grid-cols-3 sm:p-4">
+          <label className="space-y-1.5 text-xs font-bold text-muted-foreground">
+            <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 text-primary" /> Academic year</span>
+            <Input
+              value={semester.academicYear}
+              onChange={(event) => updateSemesterMetadata(semester.id, { academicYear: event.target.value.slice(0, 30) })}
+              placeholder="2025-26"
+              aria-label="Academic year"
+              className="h-10 rounded-xl bg-background text-sm font-semibold text-foreground"
+            />
+          </label>
+          <label className="space-y-1.5 text-xs font-bold text-muted-foreground">
+            <span>Semester number</span>
+            <select
+              value={semester.termNumber}
+              onChange={(event) => updateSemesterMetadata(semester.id, { termNumber: Number(event.target.value) })}
+              aria-label="Semester number"
+              className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm font-semibold text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+            >
+              <option value={1}>Semester 1</option>
+              <option value={2}>Semester 2</option>
+              <option value={3}>Semester 3</option>
+            </select>
+          </label>
+          <label className="space-y-1.5 text-xs font-bold text-muted-foreground">
+            <span>Status</span>
+            <select
+              value={semester.status}
+              onChange={(event) => updateSemesterMetadata(semester.id, { status: event.target.value as Semester["status"] })}
+              aria-label="Semester status"
+              className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm font-semibold text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+            >
+              <option value="in-progress">In progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+          <label className="space-y-1.5 text-xs font-bold text-muted-foreground sm:col-span-3">
+            <span className="flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5 text-primary" /> Semester notes <span className="font-normal text-muted-foreground/70">(optional)</span></span>
+            <textarea
+              value={tempNotes}
+              onChange={(event) => setTempNotes(event.target.value.slice(0, 1000))}
+              onBlur={() => updateSemesterMetadata(semester.id, { notes: tempNotes })}
+              placeholder="Add a short note about this semester…"
+              aria-label="Semester notes"
+              rows={2}
+              className="flex min-h-16 w-full resize-y rounded-xl border border-input bg-background px-3 py-2.5 text-sm font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
+          </label>
         </div>
       </div>
 

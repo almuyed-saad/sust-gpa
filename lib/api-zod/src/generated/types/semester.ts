@@ -7,8 +7,14 @@
  */
 import type { Course } from "./course";
 
+export type SemesterStatus = "in-progress" | "completed";
+
 export interface Semester {
   id: string;
   name: string;
+  academicYear: string;
+  termNumber: number;
+  status: SemesterStatus;
+  notes: string | null;
   courses: Course[];
 }

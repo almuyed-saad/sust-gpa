@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
-import { useGpaStore, type Course, type Semester } from "@/lib/store";
+import { api, type ApiSemester } from "@/lib/api";
+import { getCurrentAcademicYear, useGpaStore, type Course, type Semester, type SemesterMetadata } from "@/lib/store";
 
 function mapApiCourse(c: { id: string; name: string; credits: number; marks: number | null; gradeLetter?: string | null }): Course {
   return {
@@ -13,24 +13,40 @@ function mapApiCourse(c: { id: string; name: string; credits: number; marks: num
   };
 }
 
+function mapApiSemester(semester: ApiSemester): Semester {
+  return {
+    id: semester.id,
+    name: semester.name,
+    academicYear: semester.academicYear ?? '',
+    termNumber: semester.termNumber ?? 1,
+    status: semester.status === 'completed' ? 'completed' : 'in-progress',
+    notes: semester.notes ?? '',
+    courses: semester.courses.map(mapApiCourse),
+  };
+}
+
 export function useGpaActions() {
   const { isAuthenticated } = useAuth();
   const store = useGpaStore();
   const debounceTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const addSemester = useCallback(async () => {
-    const name = `Semester ${store.semesters.length + 1}`;
+    const index = store.semesters.length;
+    const termNumber = (index % 3) + 1;
+    const metadata: SemesterMetadata = {
+      name: `Year ${Math.floor(index / 3) + 1}, Semester ${termNumber}`,
+      academicYear: getCurrentAcademicYear(),
+      termNumber,
+      status: 'in-progress',
+      notes: '',
+    };
     if (!isAuthenticated) {
       store.addSemester();
       return;
     }
     try {
-      const { semester } = await api.createSemester(name);
-      store.loadFromApi([...store.semesters, {
-        id: semester.id,
-        name: semester.name,
-        courses: semester.courses.map(mapApiCourse),
-      }]);
+      const { semester } = await api.createSemester(metadata);
+      store.loadFromApi([...store.semesters, mapApiSemester(semester)]);
     } catch {
       store.addSemester();
     }
@@ -43,12 +59,27 @@ export function useGpaActions() {
     }
   }, [isAuthenticated, store]);
 
-  const updateSemesterName = useCallback(async (id: string, name: string) => {
-    store.updateSemesterName(id, name);
+  const updateSemesterMetadata = useCallback(async (id: string, updates: Partial<SemesterMetadata>) => {
+    const current = store.semesters.find((semester) => semester.id === id);
+    if (!current) return;
+    const next = { ...current, ...updates };
+    store.updateSemesterMetadata(id, updates);
     if (isAuthenticated) {
-      try { await api.updateSemester(id, name); } catch {}
+      try {
+        await api.updateSemester(id, {
+          name: next.name,
+          academicYear: next.academicYear,
+          termNumber: next.termNumber,
+          status: next.status,
+          notes: next.notes || null,
+        });
+      } catch {}
     }
   }, [isAuthenticated, store]);
+
+  const updateSemesterName = useCallback(async (id: string, name: string) => {
+    await updateSemesterMetadata(id, { name });
+  }, [updateSemesterMetadata]);
 
   const addCourse = useCallback(async (semesterId: string) => {
     if (!isAuthenticated) {
@@ -113,7 +144,13 @@ export function useGpaActions() {
 
     const importedSemesters: Semester[] = [];
     for (const semester of semesters) {
-      const { semester: createdSemester } = await api.createSemester(semester.name);
+      const { semester: createdSemester } = await api.createSemester({
+        name: semester.name,
+        academicYear: semester.academicYear,
+        termNumber: semester.termNumber,
+        status: semester.status,
+        notes: semester.notes || null,
+      });
       const seedCourse = createdSemester.courses[0];
       if (seedCourse) await api.deleteCourse(createdSemester.id, seedCourse.id);
 
@@ -131,6 +168,10 @@ export function useGpaActions() {
       importedSemesters.push({
         id: createdSemester.id,
         name: createdSemester.name,
+        academicYear: createdSemester.academicYear ?? semester.academicYear,
+        termNumber: createdSemester.termNumber ?? semester.termNumber,
+        status: createdSemester.status === 'completed' ? 'completed' : semester.status,
+        notes: createdSemester.notes ?? semester.notes,
         courses: importedCourses,
       });
     }
@@ -138,5 +179,5 @@ export function useGpaActions() {
     store.loadFromApi(importedSemesters);
   }, [isAuthenticated, store]);
 
-  return { addSemester, removeSemester, updateSemesterName, addCourse, removeCourse, updateCourse, clearAll, importSemesters };
+  return { addSemester, removeSemester, updateSemesterName, updateSemesterMetadata, addCourse, removeCourse, updateCourse, clearAll, importSemesters };
 }

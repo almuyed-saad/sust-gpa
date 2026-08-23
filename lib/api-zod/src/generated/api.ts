@@ -83,6 +83,10 @@ export const GetSemestersResponse = zod.object({
     zod.object({
       id: zod.string(),
       name: zod.string(),
+      academicYear: zod.string().max(30).default(""),
+      termNumber: zod.number().int().min(1).max(3).default(1),
+      status: zod.enum(["in-progress", "completed"]).default("in-progress"),
+      notes: zod.string().max(1000).nullable().default(null),
       courses: zod.array(
         zod.object({
           id: zod.string(),
@@ -101,7 +105,11 @@ export const GetSemestersResponse = zod.object({
  * @summary Create a new semester
  */
 export const CreateSemesterBody = zod.object({
-  name: zod.string(),
+  name: zod.string().min(1).max(120),
+  academicYear: zod.string().max(30).optional().default(""),
+  termNumber: zod.number().int().min(1).max(3).optional().default(1),
+  status: zod.enum(["in-progress", "completed"]).optional().default("in-progress"),
+  notes: zod.string().max(1000).nullable().optional().default(null),
 });
 
 /**
@@ -112,7 +120,11 @@ export const UpdateSemesterParams = zod.object({
 });
 
 export const UpdateSemesterBody = zod.object({
-  name: zod.string(),
+  name: zod.string().min(1).max(120),
+  academicYear: zod.string().max(30).optional(),
+  termNumber: zod.number().int().min(1).max(3).optional(),
+  status: zod.enum(["in-progress", "completed"]).optional(),
+  notes: zod.string().max(1000).nullable().optional(),
 });
 
 export const UpdateSemesterResponse = zod.object({

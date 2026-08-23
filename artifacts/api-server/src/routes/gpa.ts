@@ -85,6 +85,10 @@ router.post("/semesters", async (req: Request, res: Response) => {
       id: randomUUID(),
       userId,
       name: parsed.data.name,
+      academicYear: parsed.data.academicYear,
+      termNumber: parsed.data.termNumber,
+      status: parsed.data.status,
+      notes: parsed.data.notes,
       position: existing.length,
     })
     .returning();
@@ -111,7 +115,14 @@ router.put("/semesters/:semesterId", async (req: Request, res: Response) => {
 
   const [updated] = await db
     .update(semestersTable)
-    .set({ name: parsed.data.name, updatedAt: new Date() })
+    .set({
+      name: parsed.data.name,
+      ...(parsed.data.academicYear !== undefined ? { academicYear: parsed.data.academicYear } : {}),
+      ...(parsed.data.termNumber !== undefined ? { termNumber: parsed.data.termNumber } : {}),
+      ...(parsed.data.status !== undefined ? { status: parsed.data.status } : {}),
+      ...(parsed.data.notes !== undefined ? { notes: parsed.data.notes } : {}),
+      updatedAt: new Date(),
+    })
     .where(and(eq(semestersTable.id, semesterId), eq(semestersTable.userId, userId)))
     .returning();
 

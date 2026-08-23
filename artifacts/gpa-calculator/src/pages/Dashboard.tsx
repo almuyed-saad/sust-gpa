@@ -239,6 +239,10 @@ export default function Dashboard() {
           loadFromApi(remoteSemesters.map((semester) => ({
             id: semester.id,
             name: semester.name,
+            academicYear: semester.academicYear ?? "",
+            termNumber: semester.termNumber ?? 1,
+            status: semester.status === "completed" ? "completed" : "in-progress",
+            notes: semester.notes ?? "",
             courses: semester.courses.map((course) => ({
               id: course.id,
               name: course.name,

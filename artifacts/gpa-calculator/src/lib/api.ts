@@ -19,23 +19,29 @@ export interface ApiCourse {
   gradeLetter: string | null;
 }
 
+export type ApiSemesterStatus = "in-progress" | "completed";
+
 export interface ApiSemester {
   id: string;
   name: string;
+  academicYear: string;
+  termNumber: number;
+  status: ApiSemesterStatus;
+  notes: string | null;
   courses: ApiCourse[];
 }
 
 export const api = {
   getSemesters: () => apiFetch<{ semesters: ApiSemester[] }>("/semesters"),
-  createSemester: (name: string) =>
+  createSemester: (data: { name: string; academicYear?: string; termNumber?: number; status?: ApiSemesterStatus; notes?: string | null }) =>
     apiFetch<{ semester: ApiSemester }>("/semesters", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     }),
-  updateSemester: (id: string, name: string) =>
+  updateSemester: (id: string, data: { name: string; academicYear?: string; termNumber?: number; status?: ApiSemesterStatus; notes?: string | null }) =>
     apiFetch<{ semester: ApiSemester }>(`/semesters/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     }),
   deleteSemester: (id: string) =>
     apiFetch<{ success: boolean }>(`/semesters/${id}`, { method: "DELETE" }),

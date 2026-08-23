@@ -6,6 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
+import type { SemesterStatus } from "./semester";
+
 export interface UpdateSemesterBody {
   name: string;
+  academicYear?: string;
+  termNumber?: number;
+  status?: SemesterStatus;
+  notes?: string | null;
 }

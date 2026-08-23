@@ -61,8 +61,8 @@ closeTo(weightedSemester.gpa, (3 * 4 + 4 * 3) / 7, "semester GPA should be credi
 assert.equal(weightedSemester.totalCredits, 7);
 
 const semesters: Semester[] = [
-  { id: "semester-1", name: "Semester 1", courses: [course({ id: "s1", credits: 3, gradeLetter: "A+" })] },
-  { id: "semester-2", name: "Semester 2", courses: [course({ id: "s2", credits: 3, gradeLetter: "B" })] },
+  { id: "semester-1", name: "Semester 1", academicYear: "2025-26", termNumber: 1, status: "completed", notes: "Strong start", courses: [course({ id: "s1", credits: 3, gradeLetter: "A+" })] },
+  { id: "semester-2", name: "Semester 2", academicYear: "2025-26", termNumber: 2, status: "in-progress", notes: "Current term", courses: [course({ id: "s2", credits: 3, gradeLetter: "B" })] },
 ];
 const overall = calculateOverallStats(semesters);
 closeTo(overall.cgpa, 3.5, "overall CGPA should combine all completed courses");
@@ -72,8 +72,12 @@ assert.equal(overall.totalCourses, 2);
 const backupText = serializeRecordBackup(semesters);
 const parsedBackup = parseRecordBackup(backupText);
 assert.equal(parsedBackup.backup.format, "sust-gpa-record");
-assert.equal(parsedBackup.backup.version, 1);
+assert.equal(parsedBackup.backup.version, 2);
 assert.equal(parsedBackup.backup.semesters.length, 2);
+assert.equal(parsedBackup.backup.semesters[0]?.academicYear, "2025-26");
+assert.equal(parsedBackup.backup.semesters[0]?.termNumber, 1);
+assert.equal(parsedBackup.backup.semesters[0]?.status, "completed");
+assert.equal(parsedBackup.backup.semesters[0]?.notes, "Strong start");
 assert.equal(parsedBackup.backup.semesters[0]?.courses[0]?.gradeLetter, "A+");
 assert.notEqual(parsedBackup.backup.semesters[0]?.id, "semester-1", "imports should generate fresh local IDs");
 assert.equal(parsedBackup.warnings.length, 0);
@@ -90,12 +94,16 @@ assert.equal(normalized.backup.semesters[0]?.name, "Semester with override");
 assert.equal(normalized.backup.semesters[0]?.courses[0]?.name, "Course");
 assert.equal(normalized.backup.semesters[0]?.courses[0]?.gradeLetter, "A+");
 assert.equal(normalized.backup.semesters[0]?.courses[0]?.marks, "", "grade letter should take precedence over marks");
+assert.equal(normalized.backup.semesters[0]?.academicYear, "");
+assert.equal(normalized.backup.semesters[0]?.termNumber, 1);
+assert.equal(normalized.backup.semesters[0]?.status, "in-progress");
+assert.equal(normalized.backup.semesters[0]?.notes, "");
 assert.equal(normalized.warnings.length, 1);
 assert.throws(() => parseRecordBackup("not-json"), /valid JSON/);
 assert.throws(() => parseRecordBackup(JSON.stringify({ format: "other", version: 1, semesters: [] })), /compatible/);
 
 const csv = createCsvExport(semesters);
-assert.match(csv, /Semester,Course,Credits,Marks,Grade,Grade Point/);
-assert.match(csv, /Semester 1,Test Course,3,,A\+,4\.00/);
+assert.match(csv, /Semester,Academic Year,Term,Status,Notes,Course,Credits,Marks,Grade,Grade Point/);
+assert.match(csv, /Semester 1,2025-26,1,completed,Strong start,Test Course,3,,A\+,4\.00/);
 
 console.log("SUST GPA regression checks passed.");
