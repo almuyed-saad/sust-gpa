@@ -16,6 +16,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/DashboardStats";
+import { GpaGoalPlanner } from "@/components/GpaGoalPlanner";
 import { GradingScale } from "@/components/GradingScale";
 import { SemesterCard } from "@/components/SemesterCard";
 import { useAuth, login, logout } from "@/hooks/useAuth";
@@ -268,6 +269,7 @@ export default function Dashboard() {
           </section>
 
           <aside className="space-y-5 lg:sticky lg:top-24">
+            <GpaGoalPlanner />
             <div id="grading-scale"><GradingScale /></div>
             <GpaChart />
           </aside>
