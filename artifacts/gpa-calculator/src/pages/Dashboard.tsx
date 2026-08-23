@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -227,6 +227,21 @@ function GpaChart() {
 
 export default function Dashboard() {
   const semesters = useGpaStore((state) => state.semesters);
+  const duplicateSemesterIds = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const semester of semesters) {
+      const key = semester.name.trim().toLocaleLowerCase();
+      if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return new Set(
+      semesters
+        .filter((semester) => {
+          const key = semester.name.trim().toLocaleLowerCase();
+          return Boolean(key) && (counts.get(key) ?? 0) > 1;
+        })
+        .map((semester) => semester.id),
+    );
+  }, [semesters]);
   const prefersReducedMotion = useReducedMotion();
   const { addSemester } = useGpaActions();
   const { conflict, isWorking: isSyncWorking, error: syncError, resolve } = useCloudSyncResolution();
@@ -346,7 +361,7 @@ export default function Dashboard() {
                 ) : (
                   semesters.map((semester) => (
                     <motion.div key={semester.id} layout={!prefersReducedMotion} initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.97 }} transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: [0.23, 1, 0.32, 1] }}>
-                      <SemesterCard semester={semester} />
+                      <SemesterCard semester={semester} isDuplicateName={duplicateSemesterIds.has(semester.id)} />
                     </motion.div>
                   ))
                 )}

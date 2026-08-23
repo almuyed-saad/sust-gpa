@@ -12,10 +12,13 @@ import { useGpaActions } from "@/hooks/useGpaActions";
 
 interface SemesterCardProps {
   semester: Semester;
+  isDuplicateName?: boolean;
 }
 
-export function SemesterCard({ semester }: SemesterCardProps) {
+export function SemesterCard({ semester, isDuplicateName = false }: SemesterCardProps) {
   const { addCourse, removeSemester, updateSemesterName, updateSemesterMetadata } = useGpaActions();
+  const nameIssue = semester.name.trim() === "";
+  const hasNameIssue = nameIssue || isDuplicateName;
   const prefersReducedMotion = useReducedMotion();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(semester.name);
@@ -64,7 +67,9 @@ export function SemesterCard({ semester }: SemesterCardProps) {
                     onKeyDown={handleKeyDown}
                     onBlur={saveName}
                     aria-label="Semester name"
-                    className="h-9 bg-card font-display text-base font-semibold"
+                    aria-invalid={nameIssue}
+                    aria-describedby={hasNameIssue ? `semester-name-help-${semester.id}` : undefined}
+                    className={`h-9 bg-card font-display text-base font-semibold ${hasNameIssue ? "border-amber-500/50 focus-visible:ring-amber-500/30" : ""}`}
                   />
                   <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-emerald-600" onClick={saveName} aria-label="Save semester name">
                     <Check className="h-4 w-4" />
@@ -96,6 +101,13 @@ export function SemesterCard({ semester }: SemesterCardProps) {
               <p className="mt-2 text-xs text-muted-foreground">
                 {semester.courses.length} {semester.courses.length === 1 ? "course" : "courses"} · Tap the title to rename
               </p>
+              {hasNameIssue && (
+                <p id={`semester-name-help-${semester.id}`} role="status" className="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                  {nameIssue
+                    ? "Add a semester name to keep this record easy to identify."
+                    : "Another semester has this name. Add an academic year or term to distinguish them."}
+                </p>
+              )}
             </div>
           </div>
 

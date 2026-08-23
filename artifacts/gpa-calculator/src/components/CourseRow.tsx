@@ -13,6 +13,11 @@ interface CourseRowProps {
 
 export function CourseRow({ semesterId, course }: CourseRowProps) {
   const { updateCourse, removeCourse } = useGpaActions();
+  const courseNameIssue = course.name.trim() === "";
+  const creditsIssue = course.credits === "" || typeof course.credits !== "number" || course.credits <= 0 || course.credits > 10;
+  const marksIssue = course.marks !== "" && (typeof course.marks !== "number" || course.marks < 0 || course.marks > 100);
+  const resultIssue = !course.gradeLetter && course.marks === "";
+  const hasValidationIssue = courseNameIssue || creditsIssue || marksIssue || resultIssue;
 
   const handleMarksChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -62,7 +67,9 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           placeholder="e.g. Linear Algebra"
           value={course.name}
           onChange={(e) => updateCourse(semesterId, course.id, "name", e.target.value)}
-          className="h-10 rounded-xl border-border/70 bg-background text-sm font-medium text-foreground shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 lg:h-9 lg:border-transparent lg:bg-transparent"
+          aria-invalid={courseNameIssue}
+          aria-describedby={hasValidationIssue ? `course-help-${course.id}` : undefined}
+          className={`h-10 rounded-xl bg-background text-sm font-medium text-foreground shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 lg:h-9 lg:border-transparent lg:bg-transparent ${courseNameIssue ? "border-amber-500/50 focus-visible:ring-amber-500/30" : "border-border/70"}`}
         />
       </div>
 
@@ -80,7 +87,9 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
             placeholder="3"
             value={course.credits}
             onChange={handleCreditsChange}
-            className="h-10 rounded-xl border-border/70 bg-background text-center text-sm font-semibold text-foreground shadow-none focus-visible:ring-2 lg:h-9 lg:border-transparent lg:bg-transparent"
+            aria-invalid={creditsIssue}
+            aria-describedby={hasValidationIssue ? `course-help-${course.id}` : undefined}
+            className={`h-10 rounded-xl bg-background text-center text-sm font-semibold text-foreground shadow-none focus-visible:ring-2 lg:h-9 lg:border-transparent lg:bg-transparent ${creditsIssue ? "border-amber-500/50 focus-visible:ring-amber-500/30" : "border-border/70"}`}
           />
         </div>
 
@@ -97,8 +106,10 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
             value={course.marks}
             onChange={handleMarksChange}
             disabled={!!course.gradeLetter}
-            className="h-10 rounded-xl border-border/70 bg-background text-center text-sm font-semibold text-foreground shadow-none focus-visible:ring-2 disabled:bg-muted/60 disabled:text-muted-foreground/60"
-          />
+          aria-invalid={marksIssue}
+          aria-describedby={hasValidationIssue ? `course-help-${course.id}` : undefined}
+          className={`h-10 rounded-xl bg-background text-center text-sm font-semibold text-foreground shadow-none focus-visible:ring-2 disabled:bg-muted/60 disabled:text-muted-foreground/60 ${marksIssue ? "border-amber-500/50 focus-visible:ring-amber-500/30" : "border-border/70"}`}
+        />
         </div>
       </div>
 
@@ -113,7 +124,9 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           value={course.marks}
           onChange={handleMarksChange}
           disabled={!!course.gradeLetter}
-          className="h-9 rounded-lg border-transparent bg-transparent text-center text-sm font-semibold text-foreground shadow-none focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 disabled:cursor-not-allowed disabled:bg-muted/60 disabled:text-muted-foreground/45"
+          aria-invalid={marksIssue}
+          aria-describedby={hasValidationIssue ? `course-help-${course.id}` : undefined}
+          className={`h-9 rounded-lg bg-transparent text-center text-sm font-semibold text-foreground shadow-none focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 disabled:cursor-not-allowed disabled:bg-muted/60 disabled:text-muted-foreground/45 ${marksIssue ? "border-amber-500/50 focus-visible:ring-amber-500/30" : "border-transparent"}`}
         />
       </div>
 
@@ -167,6 +180,22 @@ export function CourseRow({ semesterId, course }: CourseRowProps) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+
+      {hasValidationIssue && (
+        <p
+          id={`course-help-${course.id}`}
+          role="status"
+          className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/8 px-2.5 py-2 text-xs leading-5 text-amber-800 dark:text-amber-200 lg:col-span-6 lg:mt-0"
+        >
+          {courseNameIssue
+            ? "Add a course name."
+            : creditsIssue
+              ? "Credits should be greater than 0 and no more than 10."
+              : marksIssue
+                ? "Marks must be between 0 and 100."
+                : "Add marks or choose a grade when the result is available."}
+        </p>
+      )}
     </div>
   );
 }
